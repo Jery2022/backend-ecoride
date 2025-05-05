@@ -1,11 +1,11 @@
-# RAPPEL COMMANDES GIT
-echo "# backend-ecoride" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/Jery2022/backend-ecoride.git
-git push -u origin main
+# RAPPEL COMMANDES GIT MISE EN PLACE DE MON PROJET
+1. echo "# backend-ecoride" >> README.md
+2. git init
+3. git add README.md
+4. git commit -m "first commit"
+5. git branch -M main
+6. git remote add origin https://github.com/Jery2022/backend-ecoride.git
+7. git push -u origin main
 
 # INITIALISATION DU PROJET BACKEND ECORIDE
 
@@ -47,6 +47,19 @@ Et pour mettre à jour toutes les dépendances : npm update
 
 6. Supprimer une dépendance
 Si vous devez supprimer une dépendance inutilisée, utilisez : npm uninstall nom_du_paquet
+
+7. Installer le module MySQL
+Vous devez installer le module mysql2, qui vous permet d'interagir avec une base de données MySQL. Exécutez cette commande dans le terminal : npm install mysql2
+
+8. Configurer la connexion MySQL
+Créez un fichier (par exemple, db.js) pour gérer la connexion à la base de données.
+
+9. Tester votre API
+Lancez votre application en utilisant la commande suivante : node server.js
+
+Allez dans votre navigateur ou utilisez un outil comme Postman pour accéder à http://localhost:3000/utilisateurs. Vous devriez voir les données de votre table MySQL au format JSON.
+
+
 
 
 
