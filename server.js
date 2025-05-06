@@ -1,4 +1,6 @@
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import userRouter from './routes/userRoutes.js'; // Assurez-vous que le chemin est correct
 import bodyParser from 'body-parser';
 
@@ -7,9 +9,8 @@ const port = process.env.PORT || 3000; // Port par défaut pour le serveur
 
 // Middlewares  
 app.use(bodyParser.json({ type: 'application/json' })); // Pour parser les données JSON
-
 app.use(bodyParser.urlencoded({ extended: true })); // Pour parser les données URL-encodées
-
+app.use(express.static(path.join(__dirname, 'public'))); // Middleware pour servir les fichiers statiques
 
 app.use(express.json()); //Permettra de lire les données envoyées en JSON
  

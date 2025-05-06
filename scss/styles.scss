@@ -1,0 +1,67 @@
+// Importation des variables et des mixins
+@import 'variables';
+@import 'mixins';
+
+// Styles globaux
+body {
+  font-family: $primary-font;
+  color: $text-color;
+  background-color: $background-color;
+  margin: 0;
+  padding: 0;
+}
+
+// Exemple de style pour les boutons
+.btn {
+  @include button-style($primary-color, $text-color-light);
+}
+
+// Exemple de style pour les cartes
+.card {
+  background-color: $card-background;
+  border-radius: $border-radius;
+  box-shadow: $card-shadow;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+// Exemple de style pour les formulaires
+form {
+  max-width: 600px;
+  margin: 0 auto;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+  }
+
+  button {
+    @include button-style($secondary-color, $text-color-light);
+  }
+}
+
+// Exemple de style pour la navigation
+.navbar {
+  background-color: $primary-color;
+  padding: 10px;
+
+  a {
+    color: $text-color-light;
+    margin: 0 15px;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

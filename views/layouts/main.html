@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/public/css/styles.css">
+</head>
+<body>
+    <!-- Conteneur pour la barre de navigation -->
+    <div id="navbar-container"></div>
+
+    <div class="container">
+        <!-- Contenu principal de la page -->
+        <main>
+            <h1>Bienvenue dans l'espace d'administration</h1>
+            <p>Utilisez le menu de navigation pour accéder aux différentes sections.</p>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fonction pour charger la barre de navigation
+            function loadNavbar() {
+                fetch('/partials/navbar.html')
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('navbar-container').innerHTML = data;
+                    })
+                    .catch(error => console.error('Erreur lors du chargement de la barre de navigation:', error));
+            }
+
+            // Charger la barre de navigation lorsque le DOM est prêt
+            loadNavbar();
+        });
+    </script>
+
+    <script src="/public/js/main.js"></script>
+</body>
+</html>
