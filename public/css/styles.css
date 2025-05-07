@@ -1,9 +1,39 @@
+#stats-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 50px 0;
+  border-color: #dee2e6;
+}
+#stats-container h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #007bff;
+}
+#stats-container div[id^=total] {
+  margin-bottom: 10px;
+  font-size: 18px;
+  color: #343a40;
+}
+#stats-container div[id^=total] span {
+  font-weight: bold;
+}
+#stats-container #admin-stats {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+}
+#stats-container #admin-stats #total-credit {
+  color: #6c757d;
+}
+
 body {
   font-family: "Arial, sans-serif";
   color: #343a40;
   background-color: #f8f9fa;
-  margin: 0;
-  padding: 0;
+  margin: 10;
+  padding: 10;
 }
 
 .btn {
@@ -68,7 +98,7 @@ form button:hover {
   padding: 10px;
 }
 .navbar a {
-  color: #ffffff;
+  color: #343a40;
   margin: 0 15px;
   text-decoration: none;
 }

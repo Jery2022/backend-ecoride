@@ -2,21 +2,24 @@
 @import 'variables';
 @import 'mixins';
 
+// Importation des styles pour les statistiques
+@import 'stats';
+ 
 // Styles globaux
 body {
-  font-family: $primary-font;
+  font-family: $primary-font; 
   color: $text-color;
   background-color: $background-color;
-  margin: 0;
-  padding: 0;
+  margin: 10;
+  padding: 10;
 }
 
-// Exemple de style pour les boutons
+//  style pour les boutons
 .btn {
   @include button-style($primary-color, $text-color-light);
 }
 
-// Exemple de style pour les cartes
+// Style pour les cartes
 .card {
   background-color: $card-background;
   border-radius: $border-radius;
@@ -25,7 +28,7 @@ body {
   margin-bottom: 20px;
 }
 
-// Exemple de style pour les formulaires
+// Style pour les formulaires
 form {
   max-width: 600px;
   margin: 0 auto;
@@ -56,7 +59,7 @@ form {
   padding: 10px;
 
   a {
-    color: $text-color-light;
+    color: $text-color;
     margin: 0 15px;
     text-decoration: none;
 

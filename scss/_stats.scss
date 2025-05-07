@@ -1,0 +1,36 @@
+// Styles pour le conteneur des statistiques
+#stats-container {
+    background-color: $card-background;
+    border-radius: $border-radius;
+    box-shadow: $card-shadow;
+    padding: 20px;
+    margin: 50px 0;
+    border-color: $border-color;
+  
+    h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: $primary-color;
+    }
+  
+    div[id^="total"] {
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: $text-color;
+  
+      span {
+        font-weight: bold;
+      }
+    }
+  
+    #admin-stats {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid $border-color;
+  
+      #total-credit {
+        color: $secondary-color;
+      }
+    }
+  }
+  
