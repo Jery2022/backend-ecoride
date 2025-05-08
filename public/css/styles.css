@@ -28,6 +28,34 @@
   color: #6c757d;
 }
 
+#stats-chart {
+  max-width: 100%;
+  height: auto;
+  margin: 20px auto;
+}
+
+.role-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 50px 10;
+  border-color: #dee2e6;
+}
+.role-container h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #007bff;
+}
+.role-container div {
+  margin-bottom: 50px;
+  font-size: 18px;
+  color: #343a40;
+}
+.role-container div span {
+  font-weight: bold;
+}
+
 body {
   font-family: "Arial, sans-serif";
   color: #343a40;

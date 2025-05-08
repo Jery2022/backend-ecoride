@@ -1,0 +1,27 @@
+// Styles pour le conteneur des statistiques
+.role-container {
+    background-color: $card-background;
+    border-radius: $border-radius;
+    box-shadow: $card-shadow;
+    padding: 20px;
+    margin: 50px 10;
+    border-color: $border-color; 
+  
+    h2 {
+      font-size: 24px;
+      margin-bottom: 20px; 
+      color: $primary-color;
+    }
+  
+    div {
+      margin-bottom: 50px;
+      font-size: 18px;
+      color: $text-color;
+  
+      span {
+        font-weight: bold;
+      }
+    }
+  
+  }
+

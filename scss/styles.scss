@@ -1,9 +1,8 @@
-// Importation des variables et des mixins
-@import 'variables';
-@import 'mixins';
 
-// Importation des styles pour les statistiques
-@import 'stats';
+@import 'variables';  // Importation des variables et des mixins
+@import 'mixins';  // Importation des mixins
+@import 'stats'; // Importation des styles pour les statistiques
+@import 'roles'; // Importation des styles pour les rôles
  
 // Styles globaux
 body {

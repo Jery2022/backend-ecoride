@@ -1,42 +1,25 @@
 import bcrypt from 'bcrypt';
 import connection from '../db/db.js';
-import { validationResult } from 'express-validator';
-import { promisify } from 'util';
 
-// Convertir les méthodes de connexion en Promises
+import { promisify } from 'util';
+import { validateId, handleValidationErrors } from '../utils/validation.js';
+import { USER_ADDED_MESSAGE, 
+        USER_NOT_FOUND_MESSAGE, 
+        USER_UPDATED_MESSAGE,  
+        USER_DELETED_MESSAGE, 
+        NO_DATA_TO_UPDATE_MESSAGE,  
+        SERVER_ERROR_MESSAGE } from '../utils/messages.js';
+
+// Convertir les méthodes de connexion en Promises 
 const query = promisify(connection.query).bind(connection);
 
-// Constantes pour les messages d'erreur
-const INVALID_ID_MESSAGE = 'ID invalide.';
-const SERVER_ERROR_MESSAGE = 'Erreur serveur.';
-const USER_NOT_FOUND_MESSAGE = 'Utilisateur non trouvé.';
-const USER_ADDED_MESSAGE = 'Utilisateur ajouté avec succès.';
-const USER_UPDATED_MESSAGE = 'Utilisateur mis à jour avec succès.';
-const USER_DELETED_MESSAGE = 'Utilisateur supprimé avec succès.';
-const NO_DATA_TO_UPDATE_MESSAGE = 'Aucune donnée à mettre à jour.';
-
-// Fonction utilitaire pour valider les IDs
-const validateId = (id) => {
-    const parsedId = parseInt(id, 10);
-    if (isNaN(parsedId)) {
-        throw new Error(INVALID_ID_MESSAGE);
-    }
-    return parsedId;
-};
-
-// Fonction utilitaire pour gérer les erreurs de validation
-const handleValidationErrors = (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-};
-
+// Création d'un nouvel utilisateur
 export const addUser = async (req, res) => {
     const { nom, prenom, email,  password } = req.body;
 
+    // Vérifier les erreurs de validation
     handleValidationErrors(req, res);
-
+    
     try {
         // Vérifier si l'utilisateur existe déjà
         const checkUserSql = 'SELECT * FROM utilisateur WHERE email = ?';
@@ -57,6 +40,7 @@ export const addUser = async (req, res) => {
     }
 };
 
+// Lister tous les utilisateurs
 export const getAllUsers = async (req, res) => {
     const sql = 'SELECT * FROM utilisateur';
     try {
@@ -68,6 +52,7 @@ export const getAllUsers = async (req, res) => {
     }
 };
 
+// Récuperer un utilisateur par son ID
 export const getUser = async (req, res) => {
     const id = validateId(req.params.id);
 
@@ -84,17 +69,22 @@ export const getUser = async (req, res) => {
     }
 };
 
+// Mettre à jour un utilisateur par son ID
 export const updateUser = async (req, res) => {
     const id = validateId(req.params.id);
-    const { nom, email, telephone, adresse, date_naissance, photo, password, pseudo, role } = req.body;
+    const { nom, prenom, email, telephone, adresse, date_naissance, photo, password, pseudo, role } = req.body;
 
-    handleValidationErrors(req, res);
+    handleValidationErrors(req, res);    // Vérifier les erreurs de validation
 
     const fields = [];
     const values = [];
     if (nom) {
         fields.push('nom = ?');
         values.push(nom);
+    }
+    if (prenom) {
+        fields.push('prenom = ?');
+        values.push(prenom);
     }
     if (email) {
         fields.push('email = ?');
@@ -133,7 +123,7 @@ export const updateUser = async (req, res) => {
     }
 
     if (role) {
-        fields.push('role = ?');
+        fields.push('id_role = ?');
         values.push(role);
     }
 
@@ -156,6 +146,7 @@ export const updateUser = async (req, res) => {
     }
 };
 
+// Supprimer un utilisateur par son ID
 export const deleteUser = async (req, res) => {
     const id = validateId(req.params.id);
 

@@ -1,24 +1,13 @@
 import { Router } from "express";
-import { body, param, validationResult } from 'express-validator';
+import { body, param } from 'express-validator';
 import { getUser, getAllUsers, addUser, updateUser, deleteUser } from "../controllers/userController.js";
+import { validateRequest } from "../utils/validation.js";
+import { MIN_NAME_LENGTH, 
+        NAME_LENGTH_MESSAGE, 
+        INVALID_EMAIL_MESSAGE, 
+        INVALID_ID_MESSAGE } from "../utils/messages.js";
 
 const userRouter = Router();
-
-// Middleware pour gérer les erreurs de validation
-const validateRequest = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  next();
-};
-
-
-// Constantes pour les messages d'erreur et les longueurs
-const MIN_NAME_LENGTH = 5;
-const INVALID_EMAIL_MESSAGE = "Email invalide";
-const NAME_LENGTH_MESSAGE = `Le nom doit contenir au moins ${MIN_NAME_LENGTH} caractères`;
-const INVALID_ID_MESSAGE = "ID invalide";
 
 // Route pour ajouter un utilisateur avec système de validation
 userRouter.post(
@@ -82,13 +71,5 @@ userRouter.delete(
   ],
   deleteUser
 );
-
-
-// Route pour la page d'accueil de l'API
-userRouter.get("/users", (req, res) => {
-  res.send("Bienvenue sur l'API des utilisateurs.");
-});
-
- 
 
 export default userRouter;
