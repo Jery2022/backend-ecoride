@@ -4,7 +4,7 @@ USE ecoride_db;
 -- Table des rôles (exemple : admin, employe, passager, conducteur)
 CREATE TABLE role (
     id_role INT AUTO_INCREMENT PRIMARY KEY,
-    libelle VARCHAR(50) NOT NULL UNIQUE DEFAULT 'passager', 
+    libelle VARCHAR(50) NOT NULL UNIQUE DEFAULT 'PASSAGER' 
 );
 
 -- Table des marques de voitures

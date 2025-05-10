@@ -8,3 +8,4 @@ localhost.session.sql
 *.log
 fly.toml
 *.sql
+secrets
