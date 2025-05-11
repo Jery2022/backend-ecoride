@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import userRouter from './routes/userRoutes.js'; 
 import statsRouter from './routes/statsRoutes.js';
 import roleRouter from './routes/rolesRoutes.js';
+import avisRouter from './routes/avisRoutes.js';
 import bodyParser from 'body-parser';
 
 const app = express();
@@ -66,6 +67,9 @@ app.use('/api', statsRouter);
 
 // Routes API roles
 app.use('/api', roleRouter);
+
+// Routes API avis
+app.use('/api', avisRouter);
 
 app.listen(port, () => {
     console.log(`Serveur en écoute sur http://localhost:${port}`); 

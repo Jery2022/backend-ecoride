@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier un Rôle</title>
+    <link rel="stylesheet" href="/css/styles.css" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <!-- Conteneur pour l'entête -->
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Bienvenue dans l'espace d'administration</h1>
+        <p>Utilisez le menu de navigation pour accéder aux différentes sections.</p>
+    </header>   
+
+    <!-- Conteneur pour la barre de navigation -->
+    <div id="navbar-container"></div>
+    <!--#include virtual="partials/navbar.html" -->
+
+    <div class="container">
+        <h1 class="text-center p-3 m-2">Modifier un Rôle</h1>
+         <!-- Ajoutez une div pour afficher les messages d'erreur -->
+         <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+        <form id="edit-role-form">
+            <label for="role-libelle">Nom du Rôle:</label>
+            <input type="text" id="role-libelle" name="libelle" required>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <a href="/roles/index.html" class="btn btn-secondary">Annuler</a>
+        </form>
+        <button id="delete-role-btn" class="btn btn-danger btn-delete">Supprimer le rôle</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roleId = urlParams.get('id');
+
+            if (!roleId) {
+                console.error('Aucun ID de rôle fourni dans l\'URL.');
+                return;
+            }
+
+            // Fonction pour charger les détails du rôle
+            async function loadRoleDetails() {
+                try {
+                    const response = await fetch(`/api/role/${roleId}`);
+                    if (!response.ok) throw new Error('Impossible de récupérer le rôle');
+                    
+                    const role = await response.json();
+                    const roleLibelleInput = document.getElementById('role-libelle');
+                    if (roleLibelleInput) {
+                        roleLibelleInput.value = role.libelle;
+                    } else {
+                        console.error("L'élément 'role-libelle' est introuvable.");
+                    }
+                } catch (error) {
+                    console.error('Erreur lors du chargement des détails du rôle:', error);
+                }
+            }
+
+            // Charger les détails du rôle lorsque le DOM est prêt
+            loadRoleDetails();
+
+            const form = document.getElementById('edit-role-form');
+            if (form) {
+                form.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+
+                    const roleLibelleInput = document.getElementById('role-libelle');
+                    if (!roleLibelleInput) {
+                        console.error("L'élément 'role-libelle' est introuvable.");
+                        return;
+                    }
+
+                    const roleLibelle = roleLibelleInput.value;
+                    alert(roleLibelle); // Log pour afficher le libellé du rôle dans la console pour le débogage
+
+                    // Réinitialiser le message d'erreur
+                    const errorMessage = document.getElementById('error-message');
+                    if (errorMessage) {
+                        errorMessage.classList.add('d-none');
+                        errorMessage.textContent = '';
+                    }
+
+                    try {
+                        const response = await fetch(`/api/modifier-role/${roleId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ libelle: roleLibelle })
+                        });
+
+                        if (response.ok) {
+                            window.location.href = '/roles/index.html'; // Redirige vers la liste des rôles après la modification
+                        } else {
+                            const errorData = await response.json();
+                            if (errorMessage) {
+                                errorMessage.textContent = 'Erreur lors de la modification du rôle : ' + (errorData.errors?.[0]?.msg || "Erreur inconnue");
+                                errorMessage.classList.remove('d-none');
+                            }
+                            console.error('Erreur lors de la modification du rôle:', errorData);
+                        }
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                    }
+                });
+            } else {
+                console.error("Le formulaire 'edit-role-form' est introuvable.");
+            }
+
+            const deleteRoleBtn = document.getElementById('delete-role-btn');
+            if (deleteRoleBtn) {
+                deleteRoleBtn.addEventListener('click', async function() {
+                    try {
+                        const response = await fetch(`/api/supprimer-role/${roleId}`, { method: 'DELETE' });
+
+                        if (response.ok) {
+                            window.location.href = '/roles/index.html'; // Redirige vers la liste des rôles après la suppression
+                        } else {
+                            const errorData = await response.json();
+                            console.error('Erreur lors de la suppression du rôle:', errorData.message);
+                            alert('Erreur lors de la suppression du rôle : ' + errorData.message);
+                        }
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                    }
+                });
+            } else {
+                console.error("Le bouton 'delete-role-btn' est introuvable.");
+            }
+        });
+
+    </script>
+</body>
+</html>

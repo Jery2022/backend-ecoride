@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des avis</title>
+    <link rel="stylesheet" href="/css/styles.css" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <!-- Conteneur pour l'entête -->
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Bienvenue dans l'espace d'administration</h1>
+        <p>Utilisez le menu de navigation pour accéder aux différentes sections.</p>
+    </header>   
+
+    <!-- Conteneur pour la barre de navigation -->
+    <div id="navbar-container"></div>
+    <div class="role-container">
+        <h1 class="text-center p-3 m-2">Gestion des Avis</h1>
+        <div class="container">
+            <table class="table table-responsive caption-top">
+                <caption>Liste des Avis</caption>
+                <thead class="table-light ">
+                    <tr>
+                        <th>ID</th>
+                        <th>Pseudo de l'Utilisateur</th>
+                        <th>Référence du Covoiturage</th>
+                        <th>Commentaire</th>
+                        <th>Note</th>
+                        <th>Date</th>
+                        <th>Statut</th> 
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="avis-table-body">
+                    <!-- Les avis seront listés ici -->
+                </tbody>
+            </table>
+        
+            <div class="alert alert-info" role="alert">
+                <strong>Note:</strong> Vous pouvez autoriser ou pas l'affichage d'un commentaire en utilisant le bouton valider.
+            </div>
+            <a href="/avis/create.html" class="btn btn-info">Créer un nouveau avis</a>
+            <a href="/" class="btn btn-secondary">Retour</a>
+        </div>
+        <br><br>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fonction pour charger les avis
+            async function loadAvis() {
+                try {
+                    const response = await fetch('/api/avis');
+                    const avis = await response.json();
+                    const tableBody = document.getElementById('avis-table-body');
+                    console.log(avis); // log pour afficher les avis dans la console pour le débogage   
+
+                    avis.forEach(myAvis => {
+                        const row = document.createElement('tr'); 
+                        row.innerHTML = `
+                            <td>${myAvis.id_avis}</td>
+                            <td>${myAvis.id_utilisateur}</td>
+                            <td>${myAvis.id_covoiturage}</td>
+                            <td>${myAvis.id_commentaire}</td>
+                            <td>${myAvis.note}</td>
+                            <td>${myAvis.date_creation}</td>
+                            <td>${myAvis.isValid}</td>
+                            <td>
+                                <a href="/covoiturage/edit.html?id=${myAvis.id_avis}" class="btn btn-warning">Voir le covoiturage</a>
+                                <button class="btn btn-danger btn-delete" data-id="${myAvis.id_avis}">Valider</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+
+                    // Ajouter l'événement de suppression
+                    document.querySelectorAll('.btn-delete').forEach(button => {
+                        button.addEventListener('click', async function() {
+                            const avisId = this.getAttribute('data-id');
+                            console.log('ID de l\'avis pour changer le status :', avisId); // log pour afficher l'ID de l'avis dont le statut doit changer 
+                            if (!confirm('Êtes-vous sûr de vouloir valider ce commentaire ?')) {
+                                  myAvis.isValid = true; // Changer le statut de l'avis à true (validé)
+                                  console.log('Statut de l\'avis est changé à true (validé)'); // log pour afficher le changement de statut
+                                  await saveAvis(avisId, myAvis.isValid); // Appeler la fonction pour enregistrer l'avis avec le nouveau statut
+
+                            } else {
+                                return; // Annuler la validation si l'utilisateur ne confirme pas
+                            }
+                            window.location.reload();
+                        });
+                    });
+                } catch (error) {
+                    console.error('Erreur lors du chargement des rôles:', error);
+                }
+            }
+
+            // Fonction pour supprimer un rôle
+            async function saveAvis(avisId, isValid) {
+                try {
+                    await fetch(`/api/avis/${avisId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ isValid })
+                    });
+                } catch (error) {
+                    console.error('Erreur lors de la validation du commentaire:', error);
+                }
+            }
+
+            // Charger les avis lorsque le DOM est prêt
+            loadAvis();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
