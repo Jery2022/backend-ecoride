@@ -58,7 +58,7 @@ avisRouter.put(
 // Route pour supprimer un avis par son ID avec validation de l'ID
 avisRouter.delete("/supprimer-avis/:id",
    [
-    param('id').isInt().withMessage(INVALID_ID_MESSAGE),
+    param('id').isInt().withMessage(INVALID_ID_MESSAGE), 
     validateRequest,
    ], deleteAvis
 );
