@@ -5,6 +5,7 @@ import userRouter from './routes/userRoutes.js';
 import statsRouter from './routes/statsRoutes.js';
 import roleRouter from './routes/rolesRoutes.js';
 import avisRouter from './routes/avisRoutes.js';
+import marqueRouter from './routes/marquesRoutes.js';  
 import bodyParser from 'body-parser';
 
 const app = express();
@@ -58,18 +59,35 @@ app.get('/roles/:file', (req, res) => {
     const mimeType = getMimeType(filePath); // Obtenir le type MIME
     res.sendFile(filePath, { headers: { 'Content-Type': mimeType } }); // Envoyer le fichier
 });
- 
-// Routes API utilisateurs
-app.use('/api', userRouter); 
+
+app.get('/marques/:file', (req, res) => {   
+    const filePath = path.join(__dirname, 'views', 'marques', req.params.file); // Construire le chemin du fichier
+    const mimeType = getMimeType(filePath); // Obtenir le type MIME
+    res.sendFile(filePath, { headers: { 'Content-Type': mimeType } }); // Envoyer le fichier
+});
+
 
 // Route API pour obtenir les statistiques
 app.use('/api', statsRouter); 
+ 
+// Routes API pour gerer utilisateurs
+app.use('/api', userRouter); 
 
-// Routes API roles
+// Routes API pour gerer roles
 app.use('/api', roleRouter);
 
-// Routes API avis
+// Routes API pour gerer avis
 app.use('/api', avisRouter);
+
+// Routes API pour gerer les marques
+app.use('/api', marqueRouter);
+
+/*
+// Middleware pour gérer les erreurs 404
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'views', 'partials', '404.html')); // Envoyer la page 404
+});
+*/
 
 app.listen(port, () => {
     console.log(`Serveur en écoute sur http://localhost:${port}`); 
