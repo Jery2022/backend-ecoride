@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { body, param } from 'express-validator';
-import { getRole, getAllRoles, addRole, updateRole, deleteRole } from "../controllers/rolesControllers.js";
+import { getRole, getAllRoles, addRole, updateRole, deleteRole } from "../controllers/rolesController.js";
 import { validateRequest } from "../utils/validation.js";
 import { INVALID_ID_MESSAGE } from "../utils/messages.js";
 

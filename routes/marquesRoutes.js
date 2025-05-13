@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { body, param } from 'express-validator';
-import { getMarque, getAllMarques, addMarque, updateMarque, deleteMarque } from "../controllers/marqueControllers.js";
+import { getMarque, getAllMarques, addMarque, updateMarque, deleteMarque } from "../controllers/marqueController.js";
 import { validateRequest } from "../utils/validation.js";
 import { INVALID_ID_MESSAGE } from "../utils/messages.js";
 

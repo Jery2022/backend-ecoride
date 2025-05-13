@@ -9,4 +9,5 @@ localhost.session.sql
 *.log
 fly.toml
 secrets/
+ecoride*.sql
 

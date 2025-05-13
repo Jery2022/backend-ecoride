@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier une voiture</title>
+    <link rel="stylesheet" href="/css/styles.css" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <!-- Conteneur pour l'entête -->
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Bienvenue dans l'espace d'administration</h1>
+        <p>Utilisez le menu de navigation pour accéder aux différentes sections.</p>
+    </header>   
+
+    <!-- Conteneur pour la barre de navigation -->
+    <div id="navbar-container"></div>
+    <!--#include virtual="partials/navbar.html" -->
+
+    <div class="container">
+        <h1 class="text-center p-3 m-2">Modifier une voiture</h1>
+         <!-- Div pour afficher les messages d'erreur -->
+         <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+        <form id="edit-voiture-form">
+             <div class="mb-3">
+                <label for="voiture-modele" class="form-label">Modèle:</label>
+                <input type="text" class="form-control" id="voiture-modele" name="modele" required>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-immatriculation" class="form-label">Immatriculation:</label>
+                <input type="text" class="form-control" id="voiture-immatriculation" name="immatriculation" required>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-energie" class="form-label">Energie:</label>
+                <input type="text" class="form-control" id="voiture-energie" name="energie" required>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-couleur" class="form-label">Couleur:</label>
+                <input type="text" class="form-control" id="voiture-couleur" name="couleur" required>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-date" class="form-label">Date 1ère circulation:</label>
+                <input type="date" class="form-control" id="voiture-date" name="date" required>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-marque" class="form-label">Marque:</label>
+                <select class="form-select" id="voiture-marque" name="marque" required>
+                    <!-- Les marques seront chargées ici dynamiquement -->
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-proprietaire" class="form-label">Propriétaire:</label>
+                <select class="form-select" id="voiture-proprietaire" name="proprietaire" required>
+                    <!-- Les propriétaires seront chargés ici dynamiquement -->
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <a href="/voitures/index.html" class="btn btn-secondary">Annuler</a>
+            <button id="delete-voiture-btn" class="btn btn-danger btn-delete">Supprimer cette voiture</button>
+        </form>
+       
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const voitureId = urlParams.get('id');
+
+            if (!voitureId) {
+                console.error('Aucun ID de voiture fourni dans l\'URL.');
+                return;
+            }
+
+            // Fonction pour charger les détails de la voiture 
+            async function loadVoitureDetails() {
+                try {
+                    const response = await fetch(`/api/voiture/${voitureId}`);
+                    if (!response.ok) throw new Error('Impossible de récupérer la voiture avec l\'ID ' + voitureId);
+                    
+                    const voiture = await response.json();
+
+                    const voitureModeleInput = document.getElementById('voiture-modele');
+                    if (voitureModeleInput) {
+                        voitureModeleInput.value = voiture.modele;
+                    } else {
+                        console.error("L'élément 'voiture-modele' est introuvable.");
+                    }
+
+                    const voitureImmatriculationInput = document.getElementById('voiture-immatriculation');
+                    if (voitureImmatriculationInput) {
+                        voitureImmatriculationInput.value = voiture.immatriculation;
+                    } else {
+                        console.error("L'élément 'voiture-immatriculation' est introuvable.");
+                    }
+
+                    const voitureEnergieInput = document.getElementById('voiture-energie');
+                    if (voitureEnergieInput) {
+                        voitureEnergieInput.value = voiture.energie;
+                    } else {
+                        console.error("L'élément 'voiture-energie' est introuvable.");
+                    }
+
+                    const voitureCouleurInput = document.getElementById('voiture-couleur');
+                    if (voitureCouleurInput) {
+                        voitureCouleurInput.value = voiture.couleur;
+                    } else {
+                        console.error("L'élément 'voiture-couleur' est introuvable.");
+                    }
+
+                    const voitureDateInput = document.getElementById('voiture-date');
+                    if (voitureDateInput) {
+                        voitureDateInput.value = voiture.date_premiere_circulation.split('T')[0]; // Format YYYY-MM-DD
+                    } else {
+                        console.error("L'élément 'voiture-date' est introuvable.");
+                    }
+
+                    const voitureMarqueSelect = document.getElementById('voiture-marque');
+                    if (voitureMarqueSelect) {
+                        const responseMarques = await fetch('/api/marque');
+                        const marques = await responseMarques.json();
+                        marques.forEach(marque => {
+                            const option = document.createElement('option');
+                            option.value = marque.id_marque;
+                            option.textContent = marque.libelle;
+                            if (marque.id_marque === voiture.id_marque) {
+                                option.selected = true; // Sélectionner la marque actuelle
+                            }
+                            voitureMarqueSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error("L'élément 'voiture-marque' est introuvable.");
+                    }
+
+                    const voitureProprietaireSelect = document.getElementById('voiture-proprietaire');
+                    if (voitureProprietaireSelect) {
+                        const responseUtilisateurs = await fetch('/api/utilisateurs');
+                        const utilisateurs = await responseUtilisateurs.json();
+                        utilisateurs.forEach(utilisateur => {
+                            const option = document.createElement('option');
+                            option.value = utilisateur.id_utilisateur;
+                            option.textContent = utilisateur.nom + ' ' + utilisateur.prenom; // Afficher le nom et le prénom
+                            if (utilisateur.id_utilisateur === voiture.id_utilisateur) {
+                                option.selected = true; // Sélectionner le propriétaire actuel
+                            }
+                            voitureProprietaireSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error("L'élément 'voiture-proprietaire' est introuvable.");
+                    }
+
+
+
+                } catch (error) {
+                    console.error('Erreur lors du chargement des détails de la voiture:', error);
+                }
+            }
+
+            // Charger les détails de la voiture lorsque le DOM est prêt
+            loadVoitureDetails();
+
+            const form = document.getElementById('edit-voiture-form');
+            if (form) {
+                form.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+
+                    const voitureModeleInput = document.getElementById('voiture-modele');
+                    if (!voitureModeleInput) {
+                        console.error("L'élément 'voiture-modele' est introuvable.");
+                        return;
+                    }
+
+                    const voitureImmatriculationInput = document.getElementById('voiture-immatriculation');
+                    if (!voitureImmatriculationInput) {
+                        console.error("L'élément 'voiture-immatriculation' est introuvable.");
+                        return;
+                    }
+
+                    const voitureEnergieInput = document.getElementById('voiture-energie');
+                    if (!voitureEnergieInput) {
+                        console.error("L'élément 'voiture-energie' est introuvable.");
+                        return;
+                    }
+
+                    const voitureCouleurInput = document.getElementById('voiture-couleur');
+                    if (!voitureCouleurInput) {
+                        console.error("L'élément 'voiture-couleur' est introuvable.");
+                        return;
+                    }
+
+                    const voitureDateInput = document.getElementById('voiture-date');
+                    if (!voitureDateInput) {
+                        console.error("L'élément 'voiture-date' est introuvable.");
+                        return;
+                    }
+
+                    const voitureMarqueSelect = document.getElementById('voiture-marque');
+                    if (!voitureMarqueSelect) {
+                        console.error("L'élément 'voiture-marque' est introuvable.");
+                        return;
+                    }
+
+                    const voitureProprietaireSelect = document.getElementById('voiture-proprietaire');
+                    if (!voitureProprietaireSelect) {
+                        console.error("L'élément 'voiture-proprietaire' est introuvable.");
+                        return;
+                    }
+
+
+                    const voitureModele = voitureModeleInput.value;
+                    const voitureImmatriculation = voitureImmatriculationInput.value;
+                    const voitureEnergie = voitureEnergieInput.value;
+                    const voitureCouleur = voitureCouleurInput.value;
+                    const voitureDate = voitureDateInput.value;
+                    const voitureMarque = voitureMarqueSelect.value;
+                    const voitureProprietaire = voitureProprietaireSelect.value;
+
+                    // Réinitialiser le message d'erreur
+                    const errorMessage = document.getElementById('error-message');
+                    if (errorMessage) {
+                        errorMessage.classList.add('d-none');
+                        errorMessage.textContent = '';
+                    }
+
+                    try {
+                        const response = await fetch(`/api/modifier-voiture/${voitureId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json', charset: 'utf-8'
+                            },
+                            body: JSON.stringify({ 
+                                modele: voitureModele,
+                                immatriculation: voitureImmatriculation, 
+                                energie: voitureEnergie,
+                                couleur: voitureCouleur,
+                                date_premiere_circulation: voitureDate,
+                                id_marque: voitureMarque,
+                                id_utilisateur: voitureProprietaire 
+                             })
+                        });
+                        
+                        console.log('Réponse de la requête:', response); // Log pour afficher la réponse de la requête
+
+                        if (response.ok) {
+                            window.location.href = '/voitures/index.html'; // Redirige vers la liste des voitures après la modification
+                        } else {
+                            const errorData = await response.json();
+                            if (errorMessage) {
+                                errorMessage.textContent = 'Erreur lors de la modification de la voiture: ' + (errorData.errors?.[0]?.msg || "Erreur inconnue");
+                                errorMessage.classList.remove('d-none');
+                            }
+                            console.error('Erreur lors de la modification de la voiture:', errorData);
+                        }
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                    }
+                });
+            } else {
+                console.error("Le formulaire 'edit-voiture-form' est introuvable.");
+            }
+
+            const deleteVoitureBtn = document.getElementById('delete-voiture-btn');
+            if (deleteVoitureBtn) {
+                deleteVoitureBtn.addEventListener('click', async function() {
+                    try {
+                        const response = await fetch(`/api/supprimer-voiture/${voitureId}`, { method: 'DELETE' });
+
+                        if (response.ok) {
+                            window.location.href = '/voitures/index.html'; // Redirige vers la liste des voitures après la suppression
+                        } else {
+                            const errorData = await response.json();
+                            console.error('Erreur lors de la suppression de la voiture:', errorData.message);
+                            alert('Erreur lors de la suppression de la voiture: ' + errorData.message);
+                        }
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                    }
+                });
+            } else {
+                console.error("Le bouton 'delete-voiture-btn' est introuvable.");
+            }
+        });
+
+    </script>
+</body>
+</html>
