@@ -14,7 +14,7 @@ const DATA_NOT_FOUND_MESSAGE = 'Aucune donnée trouvée.';
 const MIN_NAME_LENGTH = 5;
 const INVALID_EMAIL_MESSAGE = "Email invalide";
 const NAME_LENGTH_MESSAGE = `Le nom doit contenir au moins ${MIN_NAME_LENGTH} caractères`;
-const INVALID_ID_MESSAGE = "L\'ID doit être un entier";
+const INVALID_ID_MESSAGE = "L'ID doit être un entier";
 
 export  {
     INVALID_ID_MESSAGE,

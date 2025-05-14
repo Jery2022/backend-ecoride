@@ -22,7 +22,7 @@ export const addMarque = async (req, res) => {
     try {
         const sql = 'INSERT INTO marque (libelle) VALUES (?)';
         const result = await query(sql, [libelle]);
-        res.status(201).json({message: DATA_ADDED_MESSAGE,  id: result.insertId, name: req.body.libelle });
+        res.status(201).json({message: DATA_ADDED_MESSAGE,  id: result.insertId, libelle: req.body.libelle });
     } catch (err) {
         console.error('Erreur lors de l\'ajout de la nouvelle marque : ', err.message);
         res.status(500).json({ message: SERVER_ERROR_MESSAGE });

@@ -1,9 +1,12 @@
 import { validationResult } from 'express-validator';
+import { INVALID_ID_MESSAGE } from './messages.js';
 
 // Fonction utilitaire pour valider les IDs
 export const validateId = (id) => {
     const parsedId = parseInt(id, 10);
+
     if (isNaN(parsedId)) {
+        console.log(`ID invalide: ${id}`);
         throw new Error(INVALID_ID_MESSAGE);
     }
     return parsedId;
