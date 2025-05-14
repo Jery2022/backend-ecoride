@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter une voiture</title>
+    <link rel="stylesheet" href="/css/styles.css" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <!-- Conteneur pour l'entête -->
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Bienvenue dans l'espace d'administration</h1>
+        <p>Utilisez le menu de navigation pour accéder aux différentes sections.</p>
+    </header>
+
+    <!-- Conteneur pour la barre de navigation -->
+    <div id="navbar-container"></div>
+    <!-- Inclusion de la barre de navigation -->
+    <!--#include virtual="partials/navbar.html" -->
+
+      <div class="container">
+        <h1 class="text-center p-3 m-2">Ajouter un utilisateur</h1>
+         <!-- Div pour afficher les messages d'erreur -->
+         <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+        <form id="create-utilisateur-form">
+             <div class="mb-3">
+                <label for="utilisateur-nom" class="form-label">Nom:</label>
+                <input type="text" class="form-control" id="utilisateur-nom" name="nom" required>
+            </div>
+            <div class="mb-3">
+                <label for="utilisateur-prenom" class="form-label">Prénom:</label>
+                <input type="text" class="form-control" id="utilisateur-prenom" name="prenom" required>
+            </div>
+            <div class="mb-3">
+                <label for="utilisateur-pseudo" class="form-label">Pseudo:</label>
+                <input type="text" class="form-control" id="utilisateur-pseudo" name="pseudo" required>
+            </div>
+            <div class="mb-3">
+                <label for="utilisateur-email" class="form-label">Email:</label>
+                <input type="email" class="form-control" id="utilisateur-email" name="email" required>
+            </div>
+             <div class="mb-3">
+                <label for="utilisateur-password" class="form-label">Mot de passe:</label>
+                <input type="password" class="form-control" id="utilisateur-password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+            <a href="/utilisateurs/index.html" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('create-utilisateur-form');
+            const errorMessageDiv = document.getElementById('error-message');
+
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                const utilisateurNom = document.getElementById('utilisateur-nom').value;
+                const utilisateurPrenom = document.getElementById('utilisateur-prenom').value;
+                const utilisateurPseudo = document.getElementById('utilisateur-pseudo').value;
+                const utilisateurEmail = document.getElementById('utilisateur-email').value;
+                const utilisateurPassword = document.getElementById('utilisateur-password').value;
+
+                // Réinitialiser le message d'erreur
+                errorMessageDiv.classList.add('d-none');
+                errorMessageDiv.textContent = '';
+
+                // Vérification si les champs de saisie sont vides
+                if (!utilisateurNom || utilisateurNom.trim() === '' ) {
+                    errorMessageDiv.textContent = 'Veuillez entrer le nom de l\'utilisateur.';
+                    errorMessageDiv.classList.remove('d-none');
+                    return;
+                }
+                if (!utilisateurPrenom || utilisateurPrenom.trim() === '') {
+                    errorMessageDiv.textContent = 'Veuillez entrer le prénom de l\'utilisateur.';
+                    errorMessageDiv.classList.remove('d-none');
+                    return;
+                }
+                if (!utilisateurPseudo || utilisateurPseudo.trim() === '') {
+                    errorMessageDiv.textContent = 'Veuillez entrer le pseudo de l\'utilisateur.';
+                    errorMessageDiv.classList.remove('d-none');
+                    return;
+                }
+                if (!utilisateurPassword || utilisateurPassword.trim() === '') {
+                    errorMessageDiv.textContent = 'Veuillez entrer le mot de passe utilisateur.';
+                    errorMessageDiv.classList.remove('d-none');
+                    return;
+                }
+               
+                try {
+                    const response = await fetch('/api/ajouter-utilisateur', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json', charset: 'utf-8'
+                        },
+                        body: JSON.stringify({
+                            nom: utilisateurNom,
+                            prenom: utilisateurPrenom,
+                            pseudo: utilisateurPseudo,
+                            email: utilisateurEmail,
+                            password: utilisateurPassword
+                        })
+                    });
+
+                    if (response.ok) {
+                        window.location.href = '/utilisateurs/index.html'; // Redirige vers la liste des utilisateurs  
+                    } else if (response.status === 400) {
+                        const errorData = await response.json();
+                        const erroMessage = errorData.errors[0].msg; // Récupère le message d'erreur
+
+                        console.log('Erreur lors de la création de l\'utilisateur:', errorData.errors[0].msg); // log l'erreur dans la console
+
+                        errorMessageDiv.textContent = 'Erreur lors de la création de l\'utilisateur: ' + erroMessage; // Affiche un message d'erreur si l'utilisateur existe déjà
+                        errorMessageDiv.classList.remove('d-none');
+
+                    } else if (response.status === 500) {
+                        const errorData = await response.json();
+                        console.log('Erreur interne du serveur :', errorData); // log l'erreur dans la console
+                        errorMessageDiv.textContent = 'Erreur interne du serveur. Veuillez réessayer plus tard.';
+                        errorMessageDiv.classList.remove('d-none');
+
+                    }
+                } catch (err) {
+                    console.error('Erreur:', err);
+                    errorMessageDiv.textContent = 'Une erreur inattendue s\'est produite. Veuillez réessayer.';
+                    errorMessageDiv.classList.remove('d-none');
+                }
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

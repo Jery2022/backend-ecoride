@@ -1,4 +1,5 @@
 import express from 'express';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import userRouter from './routes/userRoutes.js'; 
@@ -73,23 +74,33 @@ app.get('/voitures/:file', (req, res) => {
     res.sendFile(filePath, { headers: { 'Content-Type': mimeType } }); // Envoyer le fichier
 });
 
+app.get('/utilisateurs/:file', (req, res) => {   
+    const filePath = path.join(__dirname, 'views', 'utilisateurs', req.params.file); // Construire le chemin du fichier
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).send('Fichier non trouvé'); // Gérer les fichiers inexistants
+    }
+    const mimeType = getMimeType(filePath); // Obtenir le type MIME
+    res.sendFile(filePath, { headers: { 'Content-Type': mimeType } }); // Envoyer le fichier
+});
+
+/*
 app.get('/users/:file', (req, res) => {   
     const filePath = path.join(__dirname, 'views', 'users', req.params.file); // Construire le chemin du fichier
     const mimeType = getMimeType(filePath); // Obtenir le type MIME
     res.sendFile(filePath, { headers: { 'Content-Type': mimeType } }); // Envoyer le fichier
 });
-
+*/
 
 // Route API pour obtenir les statistiques 
 app.use('/api', statsRouter); 
  
-// Routes API pour gerer utilisateurs
-app.use('/api', userRouter); 
-
+// Routes API pour gerer les utilisateurs
+app.use('/api', userRouter);  
+ 
 // Routes API pour gerer roles
 app.use('/api', roleRouter);
 
-// Routes API pour gerer avis
+// Routes API pour gerer les avis
 app.use('/api', avisRouter);
 
 // Routes API pour gerer les marques

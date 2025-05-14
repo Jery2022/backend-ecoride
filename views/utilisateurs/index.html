@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Utilisateurs</title>
+    <link rel="stylesheet" href="/css/styles.css" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <!-- Conteneur pour l'entête -->
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Bienvenue dans l'espace d'administration</h1>
+        <p>Utilisez le menu de navigation pour accéder aux différentes sections.</p>
+    </header>   
+
+    <!-- Conteneur pour la barre de navigation -->
+    <div id="navbar-container"></div>
+    <div class="utilisateur-container">
+        <h1 class="text-center p-3 m-2">Gestion des Utilisateurs</h1>
+        <div class="container">
+            <table class="table table-responsive caption-top">
+                <caption>Liste des Utilisateurs</caption>
+                <thead class="table-light ">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Pseudo</th>
+                        <th>Email</th>
+                        <th>Téléphone</th>
+                        <th>Crédit</th>
+                        <th>Rôle</th>
+                        <th>Statut du compte</th>
+                        <th>Compte créé le</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="utilisateurs-table-body">
+                    <!-- Les utilisateurs seront listées ici -->
+                </tbody>
+            </table>
+        
+            <div class="alert alert-info" role="alert">
+                <strong>Note:</strong> Vous pouvez modifier ou supprimer un utilisateur en utilisant les boutons correspondants.
+            </div>
+            <a href="/utilisateurs/create.html" class="btn btn-info">Ajouter un nouvelle utilisateur</a>
+            <a href="/" class="btn btn-secondary">Retour</a>
+        </div>
+        <br><br>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fonction pour charger les utilisateurs
+            async function loadUtilisateurs() {
+                try {
+                    const response = await fetch('/api/utilisateurs');
+                    const utilisateurs = await response.json();
+                    const tableBody = document.getElementById('utilisateurs-table-body');
+                    
+                    console.log('log utilisateurs',utilisateurs); // log pour afficher les utilisateurs dans la console pour le débogage   
+
+                     // Charger les rôles
+                    const roles = await fetch('/api/roles').then(res => res.json());
+
+                    console.log('log roles',roles); // log pour afficher les rôles dans la console pour le débogage
+
+                    // Créer des objets pour un accès facile par ID
+                    const roleMap = Object.fromEntries(roles.map(role => [
+                        role.id_role, role.libelle]));
+
+                    const validatedMap = { 0: 'Inactif', 1: 'Actif' };
+
+                    utilisateurs.forEach(utilisateur => {
+                        const row = document.createElement('tr'); 
+                        row.innerHTML = `
+                            <td>${utilisateur.id_utilisateur}</td>
+                            <td>${capitalizeFirstLetter(utilisateur.nom)}</td>
+                            <td>${capitalizeFirstLetter(utilisateur.prenom)}</td>
+                            <td>${utilisateur.pseudo}</td>
+                            <td>${utilisateur.email}</td>
+                            <td>${utilisateur.telephone}</td>
+                            <td>${utilisateur.credit}</td>
+                            <td>${roleMap[utilisateur.id_role] || 'Inconnu'}</td> <!-- Afficher le nom du rôle -->
+                            <td>${validatedMap[utilisateur.isValid]}</td>
+                            <td>${convertToFrenchDate(utilisateur.date_creation)}</td>
+                            <td>
+                                <a href="/utilisateurs/edit.html?id=${utilisateur.id_utilisateur}" class="btn btn-warning">Modifier</a>
+                                <button class="btn btn-danger btn-delete" data-id="${utilisateur.id_utilisateur}">Supprimer</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+       
+                    // Fonction pour supprimer une voiture 
+                    async function deleteUtilisateur(valeur) {
+                        try {
+                            await fetch(`/api/supprimer-utilisateur/${valeur}`, {
+                                method: 'DELETE'
+                            });
+                        } catch (error) {
+                            console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+                        }
+                    }
+
+                    // Ajouter l'événement de suppression
+                    document.querySelectorAll('.btn-delete').forEach(button => {
+                        button.addEventListener('click', async function() {
+                            const utilisateurId = this.getAttribute('data-id');
+                            
+                            if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+                                return; // Annuler la suppression si l'utilisateur ne confirme pas
+                            }
+                            await deleteVoiture(utilisateurId);
+                            window.location.reload();
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('Erreur lors du chargement des voitures:', error);
+                }
+        }
+
+            // Charger les utilisateurs lorsque le DOM est prêt
+            loadUtilisateurs();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/js/functions.js"></script>
+</body>
+</html>
