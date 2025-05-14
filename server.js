@@ -9,6 +9,7 @@ import avisRouter from './routes/avisRoutes.js';
 import marqueRouter from './routes/marquesRoutes.js'; 
 import voitureRouter from './routes/voituresRoutes.js'; 
 import configurationRouter from './routes/configurationRoutes.js';  
+import parametreRouter from './routes/parametreRoutes.js';  
 import bodyParser from 'body-parser';
 
 const app = express();
@@ -112,6 +113,9 @@ app.use('/api', voitureRouter);
 
 // Routes API pour gerer les configurations
 app.use('/api', configurationRouter);
+
+// Routes API pour gerer les parametres
+app.use('/api', parametreRouter);
 
 /*
 // Middleware pour gérer les erreurs 404
