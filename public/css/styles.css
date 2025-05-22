@@ -135,6 +135,7 @@ form button:hover {
 }
 
 #login-form {
-  background-color: #6c757d;
+  background-color: #ffffff;
   width: 350px;
+  padding: 10px;
 }

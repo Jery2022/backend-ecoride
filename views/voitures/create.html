@@ -150,6 +150,12 @@
                             id_utilisateur: voitureProprietaire })
                     });
 
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
+
                     if (response.ok) {
                         window.location.href = '/voitures/index.html'; // Redirige vers la liste des voitures après la création
                     } else if (response.status === 400) {

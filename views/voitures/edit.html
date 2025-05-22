@@ -71,6 +71,12 @@
             async function loadVoitureDetails() {
                 try {
                     const response = await fetch(`/api/voiture/${voitureId}`);
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
+                    
                     if (!response.ok) throw new Error('Impossible de récupérer la voiture avec l\'ID ' + voitureId);
                     
                     const voiture = await response.json();

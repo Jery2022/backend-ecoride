@@ -4,7 +4,6 @@ import connection from '../db/db.js';
 import { promisify } from 'util';
 import { validateId, handleValidationErrors } from '../utils/validation.js';
 import { 
-        USER_ADDED_MESSAGE, 
         USER_NOT_FOUND_MESSAGE, 
         USER_UPDATED_MESSAGE,  
         USER_DELETED_MESSAGE, 

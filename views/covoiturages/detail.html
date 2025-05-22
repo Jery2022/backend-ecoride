@@ -118,6 +118,12 @@
                 fetch('/api/participations').then(res => res.json()),
                 fetch('/api/covoiturages').then(res => res.json()),
             ]);
+/*
+            if (res.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    } */
 
             // Récupère l'id du covoiturage depuis l'URL  
             function getCovoiturageIdFromUrl() {

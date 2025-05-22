@@ -56,6 +56,11 @@
             async function loadUtilisateurs() {
                 try {
                     const response = await fetch('/api/utilisateurs');
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
                     const utilisateurs = await response.json();
                     const tableBody = document.getElementById('utilisateurs-table-body');
                     

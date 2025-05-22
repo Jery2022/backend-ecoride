@@ -48,6 +48,12 @@
             async function loadMarques() {
                 try {
                     const response = await fetch('/api/marques');
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
+                    
                     const marques = await response.json();
                     const tableBody = document.getElementById('marques-table-body');
                     console.log(marques); // log pour afficher les marques dans la console pour le débogage   

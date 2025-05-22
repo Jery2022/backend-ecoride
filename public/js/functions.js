@@ -14,5 +14,14 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function truncateText(text, nbLimiteCaractere) {
+    // Vérifie si le texte dépasse "nbLimiteCaractere" caractères
+    if (text.length > nbLimiteCaractere) {
+        // Retourne les "nbLimiteCaractere" premiers caractères
+        return text.substring(0, nbLimiteCaractere) + '...'; // Ajoute des points de suspension pour indiquer que le texte a été tronqué
+    }
+    return text; // Retourne le texte original s'il est déjà inférieur ou égal à "nbLimiteCaractere" caractères
+}
+
 
 

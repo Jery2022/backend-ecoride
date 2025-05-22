@@ -79,6 +79,12 @@
             async function loadUtilisateurDetails() {
                 try {
                     const response = await fetch(`/api/utilisateur/${utilisateurId}`);
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
+                    
                     if (!response.ok) throw new Error('Impossible de récupérer l\'utilisateur avec l\'ID ' + voitureId);
                     
                     const utilisateur = await response.json(); 

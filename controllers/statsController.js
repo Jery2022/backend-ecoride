@@ -1,6 +1,6 @@
 
 export const getStats = async (req, res) => {
-    // données statistiques
+    // TODO : données statistiques virtuelles à remplacer par celles de la base de données  
     const stats = {
         totalPendingServices: 20, // Nombre total de services en attente
         totalCompletedServices: 80, // Nombre total de services terminés
@@ -19,9 +19,7 @@ export const getStats = async (req, res) => {
     const totalDrivers = stats.totalActiveDrivers + stats.totalInactiveDrivers; // Calcul du nombre total de conducteurs
     const totalRides = stats.totalActiveRides + stats.totalInactiveRides; // Calcul du nombre total de trajets
 
-    // Données pour le graphique
-    // A remplacer par celles de votre base de données ou d'une API
-
+    // TODO : Données virtuelles pour le graphique à remplacer par celles de la base de données  
     const statsChart = {
         ridesPerDay: [
             { date: '2023-10-01', count: 10, credit: 100 },
@@ -42,12 +40,23 @@ export const getStats = async (req, res) => {
         ],
        
     };
-    // Montant en crédit collecté
+
+    // TODO : Montant en crédit collecté virtuel à remplacer par celles de la base de données  
     const totalCredit = statsChart.ridesPerDay.reduce((acc, ride) => acc + ride.credit, 0); // Calcul du montant total en crédit collecté  
     
+    // Vérification si l'utilisateur est un administrateur
+    if (req.session && (req.session.userRole === 1 )) {
+        req.session.isAdmin = true;
+    } else {
+         req.session.isAdmin = false;
+    };
 
-    const isAdmin = false // Remplacez par la logique de vérification du rôle de l'utilisateur
+     // Vérification si l'utilisateur est un employé
+    if (req.session && (req.session.userRole === 2 )) {
+        req.session.isEmploye = true;  
+    } else {
+        req.session.isEmploye = false;  
+    };
 
- //   const isAdmin = req.query.role === 'admin';  // Vérification si l'utilisateur est un administrateur
-    res.json({ ...stats, totalServices, totalUsers, totalDrivers, totalRides, statsChart, totalCredit, isAdmin });
+    res.json({ ...stats, totalServices, totalUsers, totalDrivers, totalRides, statsChart, totalCredit });
 };

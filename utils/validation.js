@@ -36,3 +36,18 @@ export const validateRequest = (req, res, next) => {
     }
     return time; // Retourne la valeur originale si elle est déjà au bon format
 };
+
+
+  export function isAuthenticated(req, res, next) {
+        if (req.session && req.session.userName) {
+            return next();
+        }
+        return res.status(401).json({ message: "Vous devez être connecté - Authentification requise." });
+}
+
+  export function isAdmin(req, res, next) {
+        if (req.session && req.session.userRole) {
+            return next();
+        }
+        return res.status(401).json({ message: "Vous n'avez pas les droits réquis." });
+}

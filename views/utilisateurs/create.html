@@ -146,7 +146,11 @@
                         })
                     });
 
-                    console.log('response:', response)
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
 
                     if (response.ok) {
                         window.location.href = '/utilisateurs/index.html'; // Redirige vers la liste des utilisateurs  

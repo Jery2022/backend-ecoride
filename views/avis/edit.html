@@ -27,8 +27,8 @@
             <input type="text" id="role-libelle" name="libelle" required>
             <button type="submit" class="btn btn-primary">Enregistrer</button>
             <a href="/roles/index.html" class="btn btn-secondary">Annuler</a>
+            <button id="delete-role-btn" class="btn btn-danger btn-delete">Supprimer le rôle</button>
         </form>
-        <button id="delete-role-btn" class="btn btn-danger btn-delete">Supprimer le rôle</button>
     </div>
 
     <script>
@@ -45,6 +45,12 @@
             async function loadRoleDetails() {
                 try {
                     const response = await fetch(`/api/role/${roleId}`);
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
+
                     if (!response.ok) throw new Error('Impossible de récupérer le rôle');
                     
                     const role = await response.json();

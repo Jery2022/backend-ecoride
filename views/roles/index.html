@@ -48,10 +48,29 @@
             // Fonction pour charger les rôles
             async function loadRoles() {
                 try {
-                    const response = await fetch('/api/roles');
+                    const response = await fetch('/api/roles'); 
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
+                    
                     const roles = await response.json();
+
+                    if (!response.ok) {
+                            window.location.href = '/login/login.html'; // Redirige vers la page login
+                            return;
+                        } 
+
+                    console.log('les roles : ', roles); // log pour afficher les rôles dans la console pour le débogage 
+
                     const tableBody = document.getElementById('roles-table-body');
-                    console.log(roles); // log pour afficher les rôles dans la console pour le débogage   
+
+                    if (!Array.isArray(roles)) {
+                        console.error('La réponse de /api/roles n\'est pas un tableau :', roles);
+                        tableBody.innerHTML = '<tr><td colspan="3">Aucun rôle trouvé.</td></tr>';
+                        return;
+                    }
 
                     roles.forEach(role => {
                         const row = document.createElement('tr'); 
@@ -72,7 +91,9 @@
                     document.querySelectorAll('.btn-delete').forEach(button => {
                         button.addEventListener('click', async function() {
                             const roleId = this.getAttribute('data-id');
+
                             console.log('ID du rôle à supprimer:', roleId); // log pour afficher l'ID du rôle à supprimer
+                            
                             if (!confirm('Êtes-vous sûr de vouloir supprimer ce rôle ?')) {
                                 return; // Annuler la suppression si l'utilisateur ne confirme pas
                             }
@@ -90,7 +111,7 @@
             // Fonction pour supprimer un rôle
             async function deleteRole(roleId) {
 
-                // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                // Récupération du token CSRF avant d'envoyer la requête DELETE
                 let csrfToken = '';
                 try {
                     const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });

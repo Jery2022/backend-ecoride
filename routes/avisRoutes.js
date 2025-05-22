@@ -1,14 +1,14 @@
 import { Router } from "express";
 import { body, param } from 'express-validator';
 import { getAvis, getAllAvis, addAvis, updateAvis, deleteAvis } from "../controllers/avisControllers.js";
-import { validateRequest } from "../utils/validation.js";
+import { validateRequest, isAdmin } from "../utils/validation.js";
 import { INVALID_ID_MESSAGE } from "../utils/messages.js";
 
 const avisRouter = Router();
 
 // Route pour ajouter un avis avec système de validation
 avisRouter.post(
-  "/ajouter-avis",
+  "/ajouter-avis",  
   [
     body("commentaire")
       .isLength({ max: 100 })
@@ -34,9 +34,9 @@ avisRouter.get("/avis", getAllAvis);
 // Route pour récupérer un avis par ID avec validation de l'ID
 avisRouter.get("/avis/:id",
     [
-    param('id').isInt().withMessage(INVALID_ID_MESSAGE),
- validateRequest,
-], getAvis
+      param('id').isInt().withMessage(INVALID_ID_MESSAGE),
+      validateRequest,
+    ], getAvis
 );
 
 // Route pour mettre à jour un avis par son ID avec validation

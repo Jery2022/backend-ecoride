@@ -24,8 +24,8 @@
                 <thead class="table-light ">
                     <tr>
                         <th>ID</th>
-                        <th>Pseudo de l'Utilisateur</th>
-                        <th>Référence du Covoiturage</th>
+                        <th>ID Utilisateur</th>
+                        <th>ID Covoiturage</th>
                         <th>Commentaire</th>
                         <th>Note</th>
                         <th>Date</th>
@@ -41,80 +41,103 @@
             <div class="alert alert-info" role="alert">
                 <strong>Note:</strong> Vous pouvez autoriser ou pas l'affichage d'un commentaire en utilisant le bouton valider.
             </div>
-            <a href="/avis/create.html" class="btn btn-info">Créer un nouveau avis</a>
             <a href="/" class="btn btn-secondary">Retour</a>
         </div>
         <br><br>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Fonction pour charger les avis
-            async function loadAvis() {
-                try {
-                    const response = await fetch('/api/avis');
-                    const avis = await response.json();
-                    const tableBody = document.getElementById('avis-table-body');
-                    console.log(avis); // log pour afficher les avis dans la console pour le débogage   
+        async function loadAvis() {
+            try {
+                const response = await fetch('/api/avis');
+                if (response.status === 401) {
+                    alert("Vous devez être connecté pour accéder à cette page.");
+                    window.location.href = '/login/login.html'; 
+                    return;
+                }
+                const avis = await response.json();
+                const tableBody = document.getElementById('avis-table-body');
 
-                    avis.forEach(myAvis => {
-                        const row = document.createElement('tr'); 
-                        row.innerHTML = `
-                            <td>${myAvis.id_avis}</td>
-                            <td>${myAvis.id_utilisateur}</td>
-                            <td>${myAvis.id_covoiturage}</td>
-                            <td>${myAvis.id_commentaire}</td>
-                            <td>${myAvis.note}</td>
-                            <td>${myAvis.date_creation}</td>
-                            <td>${myAvis.isValid}</td>
-                            <td>
-                                <a href="/covoiturage/edit.html?id=${myAvis.id_avis}" class="btn btn-warning">Voir le covoiturage</a>
-                                <button class="btn btn-danger btn-delete" data-id="${myAvis.id_avis}">Valider</button>
-                            </td>
-                        `;
-                        tableBody.appendChild(row);
-                    });
+                tableBody.innerHTML = '';
+                avis.forEach(myAvis => {
+                    const row = document.createElement('tr'); 
+                    row.innerHTML = `
+                        <td>${myAvis.id_avis}</td>
+                        <td>${myAvis.id_utilisateur}</td>
+                        <td>${myAvis.id_covoiturage}</td>
+                        <td>${truncateText(myAvis.commentaire, 30) || ''}</td>
+                        <td>${myAvis.note || ''}</td>
+                        <td>${myAvis.date_creation ? new Date(myAvis.date_creation).toLocaleDateString('fr-FR') : ''}</td>
+                        <td>${myAvis.isValid ? 'Validé' : 'invalidé'}</td>
+                        <td>
+                            <a href="/covoiturages/detail.html?id=${myAvis.id_covoiturage}" class="btn btn-warning">Voir </a>
+                            <button class="btn btn-success btn-validate" data-id="${myAvis.id_avis}">Valider</button>
+                            <button class="btn btn-danger btn-delete" data-id="${myAvis.id_avis}">Supprimer</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
 
-                    // Ajouter l'événement de suppression
-                    document.querySelectorAll('.btn-delete').forEach(button => {
-                        button.addEventListener('click', async function() {
-                            const avisId = this.getAttribute('data-id');
-                            console.log('ID de l\'avis pour changer le status :', avisId); // log pour afficher l'ID de l'avis dont le statut doit changer 
-                            if (!confirm('Êtes-vous sûr de vouloir valider ce commentaire ?')) {
-                                  myAvis.isValid = true; // Changer le statut de l'avis à true (validé)
-                                  console.log('Statut de l\'avis est changé à true (validé)'); // log pour afficher le changement de statut
-                                  await saveAvis(avisId, myAvis.isValid); // Appeler la fonction pour enregistrer l'avis avec le nouveau statut
-
-                            } else {
-                                return; // Annuler la validation si l'utilisateur ne confirme pas
-                            }
+                // Validation d'un avis
+                document.querySelectorAll('.btn-validate').forEach(button => {
+                    button.addEventListener('click', async function() {
+                        const avisId = this.getAttribute('data-id');
+                        if (confirm('Êtes-vous sûr de vouloir valider cet avis ?')) {
+                            await saveAvis(avisId, true);
                             window.location.reload();
-                        });
+                        }
                     });
-                } catch (error) {
-                    console.error('Erreur lors du chargement des rôles:', error);
-                }
-            }
+                });
 
-            // Fonction pour supprimer un rôle
-            async function saveAvis(avisId, isValid) {
-                try {
-                    await fetch(`/api/avis/${avisId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ isValid })
+                // Suppression d'un avis
+                document.querySelectorAll('.btn-delete').forEach(button => {
+                    button.addEventListener('click', async function() {
+                        const avisId = this.getAttribute('data-id');
+                        if (confirm('Êtes-vous sûr de vouloir supprimer cet avis ?')) {
+                            await deleteAvis(avisId);
+                            window.location.reload();
+                        }
                     });
-                } catch (error) {
-                    console.error('Erreur lors de la validation du commentaire:', error);
-                }
-            }
+                });
 
-            // Charger les avis lorsque le DOM est prêt
-            loadAvis();
-        });
+            } catch (error) {
+                console.error('Erreur lors du chargement des avis:', error);
+            }
+        }
+
+        async function saveAvis(avisId, isValid) {
+            try {
+                await fetch(`/api/avis/${avisId}`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-csrf-token': csrfToken
+                    },
+                    body: JSON.stringify({ isValid })
+                });
+            } catch (error) {
+                console.error('Erreur lors de la validation d\'un avis:', error);
+            }
+        }
+
+        async function deleteAvis(avisId) {
+            try {
+                await fetch(`/api/avis/${avisId}`, {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: {
+                        'x-csrf-token': csrfToken
+                    }
+                });
+            } catch (error) {
+                console.error('Erreur lors de la suppression d\'un avis:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadAvis);
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/js/functions.js"></script>
 </body>
 </html>

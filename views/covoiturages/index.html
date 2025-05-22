@@ -61,6 +61,12 @@
             async function loadCovoiturages() {
                 try {
                     const response = await fetch('/api/covoiturages');
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
+                    
                     const covoiturages = await response.json();
 
                     // Réinitialiser le message d'erreur

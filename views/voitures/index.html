@@ -54,6 +54,12 @@
             async function loadVoitures() {
                 try {
                     const response = await fetch('/api/voitures');
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
+
                     const voitures = await response.json();
                     const tableBody = document.getElementById('voitures-table-body');
                     

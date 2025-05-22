@@ -13,6 +13,8 @@ import parametreRouter from './routes/parametreRoutes.js';
 import covoiturageRouter from './routes/covoiturageRoutes.js'; 
 import participationRouter from './routes/participationRoutes.js'; 
 import authRouter from './routes/authRoutes.js';  
+import sessionRouter from './routes/sessionRoutes.js';  
+import { isAuthenticated } from './utils/validation.js';
 import bodyParser from 'body-parser';
 import  cookieParser from 'cookie-parser';
 import session from 'express-session'; 
@@ -78,7 +80,9 @@ function getMimeType(filePath) {
 }
 
 
-
+/*
+** ROUTES STATIQUES
+*/
 
 // Route principale
 app.get('/', (req, res) => {
@@ -133,6 +137,16 @@ app.get('/covoiturages/:file', (req, res) => {
     res.sendFile(filePath, { headers: { 'Content-Type': mimeType } }); // Envoyer le fichier
 });
 
+
+app.get('/avis/:file', (req, res) => {   
+    const filePath = path.join(__dirname, 'views', 'avis', req.params.file); // Construire le chemin du fichier
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).send('Fichier non trouvé'); // Gérer les fichiers inexistants 
+    }
+    const mimeType = getMimeType(filePath); // Obtenir le type MIME
+    res.sendFile(filePath, { headers: { 'Content-Type': mimeType } }); // Envoyer le fichier
+});
+
 // Route pour afficher le formulaire d'inscription
 app.get('/inscriptions/:file', (req, res) => {   
     const filePath = path.join(__dirname, 'views', 'inscriptions', req.params.file); // Construire le chemin du fichier
@@ -153,14 +167,20 @@ app.get('/login/:file', (req, res) => {
     res.sendFile(filePath, { headers: { 'Content-Type': mimeType } });  
 });
 
+// Route pour afficher le formulaire d'enrégistrement (envoie juste le fichier HTML)
+app.get('/register/:file', (req, res) => {   
+    const filePath = path.join(__dirname, 'views', 'register', req.params.file);
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).send('Fichier non trouvé');
+    }
+    const mimeType = getMimeType(filePath);
+    res.sendFile(filePath, { headers: { 'Content-Type': mimeType } });  
+});
+
 
 
 /*
-app.get('/users/:file', (req, res) => {   
-    const filePath = path.join(__dirname, 'views', 'users', req.params.file); // Construire le chemin du fichier
-    const mimeType = getMimeType(filePath); // Obtenir le type MIME
-    res.sendFile(filePath, { headers: { 'Content-Type': mimeType } }); // Envoyer le fichier
-});
+** ROUTES API
 */
 
 // Route API pour fournir le token CSRF au frontend
@@ -169,45 +189,48 @@ app.get('/api/csrf-token', csrfProtection, (req, res) => {
 });
 
 
-// Routes API pour s'enrégister et se connecter  
+// Routes API pour s'enrégister, se connecter et se déconnecter 
 app.use('/api', authRouter); 
 
+// Routes API pour obtenir les données de session 
+app.use('/api', sessionRouter); 
+
 // Route API pour obtenir les statistiques 
-app.use('/api', statsRouter); 
+app.use('/api', isAuthenticated, statsRouter); 
   
 // Routes API pour gerer les utilisateurs
 app.use('/api', csrfProtection, userRouter);   
  
-// Routes API pour gerer roles
-app.use('/api', roleRouter);
+// Routes API pour gerer roles 
+app.use('/api', isAuthenticated, roleRouter);
 
 // Routes API pour gerer les avis
-app.use('/api', avisRouter);
+app.use('/api', isAuthenticated, avisRouter);
 
 // Routes API pour gerer les marques
-app.use('/api', marqueRouter);
+app.use('/api', isAuthenticated, marqueRouter);
 
 // Routes API pour gerer les voitures
-app.use('/api', voitureRouter);
+app.use('/api', isAuthenticated, voitureRouter);
 
 // Routes API pour gerer les configurations
-app.use('/api', configurationRouter);
+app.use('/api', isAuthenticated, configurationRouter);
 
 // Routes API pour gerer les parametres
-app.use('/api', parametreRouter);
+app.use('/api', isAuthenticated, parametreRouter);
 
 // Routes API pour gerer les covoiturages
-app.use('/api', covoiturageRouter); 
+app.use('/api', isAuthenticated, covoiturageRouter); 
 
 // Routes API pour gérer les participations aux covoiturages
-app.use('/api', participationRouter);
+app.use('/api', isAuthenticated, participationRouter);
 
 
 
 /*
 // Middleware pour gérer les erreurs 404
 app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'views', 'partials', '404.html')); // Envoyer la page 404
+    res.status(404).sendFile(path.join(__dirname, 'views', 'partials', '404.html')); // Affichage de la page 404
 });
 */
 

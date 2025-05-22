@@ -1,4 +1,33 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+
+    let isAdmin = false;
+    let isEmploye = false;
+    let userName = '';
+
+    async function loadSession() {
+        try {
+            const response = await fetch('/api/session', { credentials: 'include' });
+            
+            if (response.ok) {
+                const session = await response.json();
+
+                isAdmin = session.isAdmin;
+                isEmploye = session.isEmploye;
+                userName = session.userName;
+            } else {
+                isAdmin = false;
+                isEmploye = false;
+                userName = '';
+            }
+
+        } catch (error) {
+            isAdmin = false;
+            isEmploye = false;
+            userName = '';
+        }
+
+    }
+
     // Fonction pour charger la barre de navigation
     async function loadNavbar() {
         try {
@@ -8,15 +37,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const dataNavbar = await response.text();
             document.getElementById('navbar-container').innerHTML = dataNavbar;
+            
+            // Evénement de déconnexion après le chargement de la navbar
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                    logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logout(); 
+                });
+            }
         } catch (error) {
             console.error('Erreur lors du chargement de la barre de navigation:', error);
         }
+
     }
 
-    // Fonction pour charger le contenu des statistiques
+    // Fonction pour afficher la section des statistiques
     async function loadPageStats() {
         try {
             const response = await fetch('/partials/stats.html');
+
             if (!response.ok) {
                 throw new Error('Erreur lors du chargement des statistiques');
             }
@@ -32,6 +72,13 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadStats() {
         try {
             const response = await fetch('/api/stats');
+
+            if (response.status === 401) {
+                alert("Vous devez être connecté pour accéder à cette page.");
+                window.location.href = '/login/login.html';
+                return;
+            }
+
             if (!response.ok) {
                 throw new Error('Erreur lors de la récupération des statistiques');
             }
@@ -42,24 +89,16 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('ride-count').textContent = stats.totalRides;
             document.getElementById('review-count').textContent = stats.totalReviews;
 
-            if (stats.isAdmin) { // Vérification du rôle un admin
+            if (isAdmin) { 
+                // Vérification du rôle un administrateur
                 document.getElementById('admin-stats').style.display = 'block';
+                document.getElementById('stats-chart').style.display = 'block';
                 document.getElementById('credit-amount').textContent = stats.totalCredit;
             }
-
-          //  console.log(stats.statsChart.ridesPerDay); // Afficher les statistiques dans la console pour le débogage
-
-            // Préparation des données pour le graphique
-            const ridesPerDay = stats.statsChart.ridesPerDay;
-            ridesPerDay.forEach(ride => {
-                console.log(`Date: ${ride.date}, Count: ${ride.count}`);
-            });
-         
 
            const labels = stats.statsChart.ridesPerDay.map(item => item.date);
            const dataRides = stats.statsChart.ridesPerDay.map(item => item.count);
            const dataCredit = stats.statsChart.ridesPerDay.map(item => item.credit);
-           //const dataCredit = Array(labels.length).fill(stats.totalCredit);
 
             // Création du graphique
             const ctx = document.getElementById('statsChart').getContext('2d');
@@ -81,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             borderColor: 'rgba(255, 99, 132, 1)',
                             borderWidth: 1,
                             fill: false,
-                            hidden: !stats.isAdmin // Masquer si ce n'est pas un admin
+                            hidden: isAdmin // Masquer si ce n'est pas un administrateur
                         }
                     ]
                 },
@@ -100,7 +139,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Charger la barre de navigation et les statistiques lorsque le DOM est prêt
+    // Fonction de déconnexion côté frontend
+    async function logout() {
+        try {
+             // Récupération du token CSRF
+            let csrfToken = '';
+            try {
+                    const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                    const csrfData = await csrfRes.json();
+                    csrfToken = csrfData.csrfToken;
+                } catch (err) {
+                    alert('Erreur CSRF, veuillez réessayer.');
+                    return;
+                }
+
+            const response = await fetch('/api/logout', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'x-csrf-token': csrfToken
+                }
+            });
+            if (response.ok) {
+                window.location.href = '/login/login.html';
+            }
+        } catch (error) {
+            alert('Erreur lors de la déconnexion');
+        }
+    }
+
+    // Charge les données de session
+    await loadSession();
+
+    // Charge la barre de navigation et les statistiques lorsque le DOM est prêt
     loadNavbar();
     loadPageStats();
    

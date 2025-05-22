@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { body } from 'express-validator';
-import { register, login  } from "../controllers/authController.js";
+import { register, login, logout  } from "../controllers/authController.js";
 import { validateRequest } from "../utils/validation.js";
 import { MIN_NAME_LENGTH, 
         NAME_LENGTH_MESSAGE, 
@@ -33,5 +33,11 @@ authRouter.post('/login',
         validateRequest, // Ajout du middleware pour gérer les erreurs
   ],
     login);
+
+authRouter.post('/logout', logout);
+
+authRouter.get('/logout', (req, res) => {
+    res.redirect('/login/login.html'); 
+});
 
 export default authRouter;
