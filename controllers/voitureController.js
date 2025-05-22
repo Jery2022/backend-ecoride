@@ -92,7 +92,7 @@ export const updateVoiture = async (req, res) => {
                     immatriculation = ?, \
                     energie = ?, couleur = ?, \
                     date_premiere_circulation = ?, \
-                    id_marque = ?, id_utilisateur = ? \
+                    id_marque = ? \
                     WHERE id_voiture = ?';
 
         const result = await query(sql, [req.body.modele, 
@@ -101,8 +101,8 @@ export const updateVoiture = async (req, res) => {
                         req.body.couleur,
                         req.body.date_premiere_circulation,
                         req.body.id_marque,
-                        req.body.id_utilisateur,
-                        id]);
+                        id
+                    ]);
 
         if (result.affectedRows > 0) {
             res.status(200).json({ message: DATA_UPDATED_MESSAGE, id: id, modele: req.body.modele });

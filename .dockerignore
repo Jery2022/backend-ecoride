@@ -10,4 +10,4 @@ localhost.session.sql
 fly.toml
 secrets/
 ecoride*.sql
-
+hachage*.js

@@ -61,7 +61,7 @@
                     
                     console.log('log utilisateurs',utilisateurs); // log pour afficher les utilisateurs dans la console pour le débogage   
 
-                     // Charger les rôles
+                    // Charger les rôles
                     const roles = await fetch('/api/roles').then(res => res.json());
 
                     console.log('log roles',roles); // log pour afficher les rôles dans la console pour le débogage
@@ -92,12 +92,27 @@
                         `;
                         tableBody.appendChild(row);
                     });
+
+                    // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                    let csrfToken = '';
+                    try {
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        console.log('Impossible de récupérer le token CSRF');
+                        return;
+                    }
        
-                    // Fonction pour supprimer une voiture 
+                    // Fonction pour supprimer un utilisateur 
                     async function deleteUtilisateur(valeur) {
                         try {
                             await fetch(`/api/supprimer-utilisateur/${valeur}`, {
-                                method: 'DELETE'
+                            method: 'DELETE',
+                            credentials: 'include',
+                            headers: {
+                                'x-csrf-token': csrfToken
+                                }
                             });
                         } catch (error) {
                             console.error('Erreur lors de la suppression de l\'utilisateur:', error);
@@ -112,7 +127,7 @@
                             if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
                                 return; // Annuler la suppression si l'utilisateur ne confirme pas
                             }
-                            await deleteVoiture(utilisateurId);
+                            await deleteUtilisateur(utilisateurId);
                             window.location.reload();
                         });
                     });

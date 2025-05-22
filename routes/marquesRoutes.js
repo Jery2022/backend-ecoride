@@ -21,7 +21,7 @@ marqueRouter.post(
 );
 
 // Route pour récupérer toutes les marques
-marqueRouter.get("/marque", getAllMarques);
+marqueRouter.get("/marques", getAllMarques);
 
 // Route pour récupérer une marque par ID avec validation de l'ID
 marqueRouter.get("/marque/:id",

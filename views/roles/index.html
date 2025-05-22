@@ -44,6 +44,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
             // Fonction pour charger les rôles
             async function loadRoles() {
                 try {
@@ -65,6 +66,8 @@
                         tableBody.appendChild(row);
                     });
 
+                   
+
                     // Ajouter l'événement de suppression
                     document.querySelectorAll('.btn-delete').forEach(button => {
                         button.addEventListener('click', async function() {
@@ -82,11 +85,29 @@
                 }
             }
 
+            
+
             // Fonction pour supprimer un rôle
             async function deleteRole(roleId) {
+
+                // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                let csrfToken = '';
+                try {
+                    const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                    const csrfData = await csrfRes.json();
+                    csrfToken = csrfData.csrfToken;
+                } catch (err) {
+                    console.log('Impossible de récupérer le token CSRF');
+                    return;
+                }
+
                 try {
                     await fetch(`/api/supprimer-role/${roleId}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        credentials: 'include',
+                        headers: {
+                            'x-csrf-token': csrfToken
+                        }
                     });
                 } catch (error) {
                     console.error('Erreur lors de la suppression du rôle:', error);

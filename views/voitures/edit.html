@@ -49,12 +49,7 @@
                     <!-- Les marques seront chargées ici dynamiquement -->
                 </select>
             </div>
-            <div class="mb-3">
-                <label for="voiture-proprietaire" class="form-label">Propriétaire:</label>
-                <select class="form-select" id="voiture-proprietaire" name="proprietaire" required>
-                    <!-- Les propriétaires seront chargés ici dynamiquement -->
-                </select>
-            </div>
+            
             <button type="submit" class="btn btn-primary">Enregistrer</button>
             <a href="/voitures/index.html" class="btn btn-secondary">Annuler</a>
             <button id="delete-voiture-btn" class="btn btn-danger btn-delete">Supprimer cette voiture</button>
@@ -117,7 +112,7 @@
 
                     const voitureMarqueSelect = document.getElementById('voiture-marque');
                     if (voitureMarqueSelect) {
-                        const responseMarques = await fetch('/api/marque');
+                        const responseMarques = await fetch('/api/marques');
                         const marques = await responseMarques.json();
                         marques.forEach(marque => {
                             const option = document.createElement('option');
@@ -131,25 +126,6 @@
                     } else {
                         console.error("L'élément 'voiture-marque' est introuvable.");
                     }
-
-                    const voitureProprietaireSelect = document.getElementById('voiture-proprietaire');
-                    if (voitureProprietaireSelect) {
-                        const responseUtilisateurs = await fetch('/api/utilisateurs');
-                        const utilisateurs = await responseUtilisateurs.json();
-                        utilisateurs.forEach(utilisateur => {
-                            const option = document.createElement('option');
-                            option.value = utilisateur.id_utilisateur;
-                            option.textContent = utilisateur.nom + ' ' + utilisateur.prenom; // Afficher le nom et le prénom
-                            if (utilisateur.id_utilisateur === voiture.id_utilisateur) {
-                                option.selected = true; // Sélectionner le propriétaire actuel
-                            }
-                            voitureProprietaireSelect.appendChild(option);
-                        });
-                    } else {
-                        console.error("L'élément 'voiture-proprietaire' est introuvable.");
-                    }
-
-
 
                 } catch (error) {
                     console.error('Erreur lors du chargement des détails de la voiture:', error);
@@ -200,12 +176,6 @@
                         return;
                     }
 
-                    const voitureProprietaireSelect = document.getElementById('voiture-proprietaire');
-                    if (!voitureProprietaireSelect) {
-                        console.error("L'élément 'voiture-proprietaire' est introuvable.");
-                        return;
-                    }
-
 
                     const voitureModele = voitureModeleInput.value;
                     const voitureImmatriculation = voitureImmatriculationInput.value;
@@ -213,7 +183,6 @@
                     const voitureCouleur = voitureCouleurInput.value;
                     const voitureDate = voitureDateInput.value;
                     const voitureMarque = voitureMarqueSelect.value;
-                    const voitureProprietaire = voitureProprietaireSelect.value;
 
                     // Réinitialiser le message d'erreur
                     const errorMessage = document.getElementById('error-message');
@@ -222,11 +191,25 @@
                         errorMessage.textContent = '';
                     }
 
+                    // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                    let csrfToken = '';
+                    try {
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        console.log('Impossible de récupérer le token CSRF');
+                        return;
+                    }
+
+
                     try {
                         const response = await fetch(`/api/modifier-voiture/${voitureId}`, {
                             method: 'PUT',
+                            credentials: 'include',
                             headers: {
-                                'Content-Type': 'application/json', charset: 'utf-8'
+                                'Content-Type': 'application/json', charset: 'utf-8',
+                                'x-csrf-token': csrfToken
                             },
                             body: JSON.stringify({ 
                                 modele: voitureModele,
@@ -234,8 +217,7 @@
                                 energie: voitureEnergie,
                                 couleur: voitureCouleur,
                                 date_premiere_circulation: voitureDate,
-                                id_marque: voitureMarque,
-                                id_utilisateur: voitureProprietaire 
+                                id_marque: Number(voitureMarque),
                              })
                         });
                         
@@ -260,10 +242,29 @@
             }
 
             const deleteVoitureBtn = document.getElementById('delete-voiture-btn');
+
             if (deleteVoitureBtn) {
                 deleteVoitureBtn.addEventListener('click', async function() {
+
+                    // Récupération du token CSRF AVANT d'envoyer la requête DELETE
+                    let csrfToken = '';
                     try {
-                        const response = await fetch(`/api/supprimer-voiture/${voitureId}`, { method: 'DELETE' });
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        console.log('Impossible de récupérer le token CSRF');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/supprimer-voiture/${voitureId}`, { 
+                            method: 'DELETE',
+                            credentials: 'include',
+                            headers: {
+                                'x-csrf-token': csrfToken
+                            }
+                        });
 
                         if (response.ok) {
                             window.location.href = '/voitures/index.html'; // Redirige vers la liste des voitures après la suppression
@@ -276,9 +277,7 @@
                         console.error('Erreur:', error);
                     }
                 });
-            } else {
-                console.error("Le bouton 'delete-voiture-btn' est introuvable.");
-            }
+            }  
         });
 
     </script>

@@ -60,10 +60,6 @@
                     <!-- Les statuts du compte seront chargés ici dynamiquement -->
                 </select>
             </div>
-             <div class="mb-3">
-                <label for="utilisateur-date-compte" class="form-label">Compte créé le:</label>
-                <input type="date" class="form-control" id="utilisateur-date-compte" name="date-creation" required>
-            </div>
             <button type="submit" class="btn btn-primary">Enregistrer</button>
             <a href="/utilisateurs/index.html" class="btn btn-secondary">Annuler</a>
             <button id="delete-utilisateur-btn" class="btn btn-danger btn-delete">Supprimer cette voiture</button>
@@ -137,7 +133,7 @@
                             const option = document.createElement('option');
                             option.value = role.id_role;
                             option.textContent = role.libelle;
-                            if (role.id_role === utilisateur.id_utilisateur) {
+                            if (role.id_role === utilisateur.id_role) {
                                 option.selected = true; // Sélectionner le role actuelle
                             }
                             utilisateurRoleSelect.appendChild(option);
@@ -146,32 +142,31 @@
                         console.error("L'élément 'utilisateur-role' est introuvable.");
                     }
 
+
                     const utilisateurStatutCompteSelect = document.getElementById('utilisateur-statut-compte');
                     if (utilisateurStatutCompteSelect) {
-                        const responseUtilisateursStatutCompte = await fetch('/api/utilisateurs');
-                        const utilisateursStatutCompte = await responseUtilisateursStatutCompte.json();
-                        utilisateursStatutCompte.forEach(statut => {
+
+                        // Efface les options existantes
+                        utilisateurStatutCompteSelect.innerHTML = '';
+
+                        // Ajoute de l'un des  statuts possibles
+                        const statuts = [
+                            { value: 1, label: 'Actif' },
+                            { value: 0, label: 'Inactif' }
+                        ];
+                            
+                        statuts.forEach(statut => {
                             const option = document.createElement('option');
-                            option.value = statut.id_utilisateur;
-                            option.textContent = statut.isValid;  
-                            if (statut.id_utilisateur === utilisateursStatutCompte.id_utilisateur) {
-                                option.selected = true; // Sélectionner le propriétaire actuel
+                            option.value = statut.value 
+                            option.textContent = statut.label;
+                            if ( statut.value === utilisateur.isValid ) {
+                                option.selected = true; // Selection de la valeur actuelle du statut du compte 
                             }
                             utilisateurStatutCompteSelect.appendChild(option);
-                        });
+                            });
                     } else {
                         console.error("L'élément 'utilisateur-statut-compte' est introuvable.");
                     }
-
-                    const utilisateurDateCompteInput = document.getElementById('utilisateur-date-compte');
-                    if (utilisateurDateCompteInput) {
-                        utilisateurDateCompteInput.value = utilisateur.date_creation.split('T')[0]; // Format YYYY-MM-DD
-                    } else {
-                        console.error("L'élément 'utilisateur-date-compte' est introuvable.");
-                    }
-
-
-
                 } catch (error) {
                     console.error('Erreur lors du chargement des détails de la voiture:', error);
                 }
@@ -233,24 +228,15 @@
                         return;
                     }
 
-                    const utilisateurDateCompteInput = document.getElementById('utilisateur-date-compte');
-                    if (!utilisateurDateCompteInput) {
-                        console.error("L'élément 'utilisateur-date-compte' est introuvable.");
-                        return;
-                    }
-
-
-
                     // Récupérer les valeurs des champs du formulaire
                     const utilisateurNom = utilisateurNomInput.value;
                     const utilisateurPrenom = utilisateurPrenomInput.value;
                     const utilisateurPseudo = utilisateurPseudoInput.value;
                     const utilisateurEmail = utilisateurEmailInput.value;
-                    const utilisateurTelephone = utilisateurTelephoneInput.value;
+                    const utilisateurTelephone = utilisateurTelephoneInput.value; 
                     const utilisateurCredit = utilisateurCreditInput.value;
                     const utilisateurRole = utilisateurRoleSelect.value;
-                    const utilisateurStatutCompte = utilisateurStatutCompteSelect.value;
-                    const utilisateurDateCompte = utilisateurDateCompteInput.value;
+                    const utilisateurStatutCompte = utilisateurStatutCompteSelect.value; 
 
                     // Réinitialiser le message d'erreur
                     const errorMessage = document.getElementById('error-message');
@@ -259,11 +245,52 @@
                         errorMessage.textContent = '';
                     }
 
+                    // Vérification si les champs de saisie sont vides
+                    if (!utilisateurNom || utilisateurNom.trim() === '' ) {
+                        errorMessageDiv.textContent = 'Veuillez entrer le nom de l\'utilisateur.';
+                        errorMessageDiv.classList.remove('d-none');
+                        return;
+                    }
+                    if (!utilisateurPrenom || utilisateurPrenom.trim() === '') {
+                        errorMessageDiv.textContent = 'Veuillez entrer le prénom de l\'utilisateur.';
+                        errorMessageDiv.classList.remove('d-none');
+                        return;
+                    }
+                    if (!utilisateurPseudo || utilisateurPseudo.trim() === '') {
+                        errorMessageDiv.textContent = 'Veuillez entrer le pseudo de l\'utilisateur.';
+                        errorMessageDiv.classList.remove('d-none');
+                        return;
+                    }
+                    if (!utilisateurRole) {
+                        errorMessageDiv.textContent = 'Veuillez sélectionner un rôle.';
+                        errorMessageDiv.classList.remove('d-none');
+                        return;
+                    }
+                    if (!utilisateurStatutCompte) {
+                        errorMessageDiv.textContent = 'Veuillez sélectionner un statut.';
+                        errorMessageDiv.classList.remove('d-none');
+                        return;
+                    }
+
+                    // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                    let csrfToken = '';
+                    try {
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        console.log('Impossible de récupérer le token CSRF');
+                        return;
+                    }
+
                     try {
                         const response = await fetch(`/api/modifier-utilisateur/${utilisateurId}`, {
                             method: 'PUT',
+                            credentials: 'include',
                             headers: {
-                                'Content-Type': 'application/json', charset: 'utf-8'
+                                'Content-Type': 'application/json',  
+                                charset: 'utf-8',
+                                'x-csrf-token': csrfToken
                             },
                             body: JSON.stringify({ 
                                 nom: utilisateurNom,
@@ -274,7 +301,6 @@
                                 credit: utilisateurCredit,
                                 id_role: utilisateurRole,
                                 isValid: utilisateurStatutCompte,
-                                date_creation: utilisateurDateCompte
                             })
                         });
                         
@@ -285,24 +311,42 @@
                         } else {
                             const errorData = await response.json();
                             if (errorMessage) {
-                                errorMessage.textContent = 'Erreur lors de la modification de la voiture: ' + (errorData.errors?.[0]?.msg || "Erreur inconnue");
+                                errorMessage.textContent = 'Erreur lors de la modification de l\'utilisateur: ' + (errorData.errors?.[0]?.msg || "Erreur inconnue");
                                 errorMessage.classList.remove('d-none');
                             }
-                            console.error('Erreur lors de la modification de la voiture:', errorData);
+                            console.error('Erreur lors de la modification de l\'utilisateur:', errorData);
                         }
                     } catch (error) {
                         console.error('Erreur:', error);
                     }
                 });
-            } else {
-                console.error("Le formulaire 'edit-utilisateur-form' est introuvable.");
-            }
+            }  
 
             const deleteUtilisateurBtn = document.getElementById('delete-utilisateur-btn');
             if (deleteUtilisateurBtn) {
-                deleteUtilisateurBtn.addEventListener('click', async function() {
+                deleteUtilisateurBtn.addEventListener('click', async function(event) {
+                    event.preventDefault();
+
+                    // Récupération du token CSRF AVANT d'envoyer la requête DELETE
+                    let csrfToken = '';
                     try {
-                        const response = await fetch(`/api/supprimer-utilisateur/${utilisateurId}`, { method: 'DELETE' });
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        console.log('Impossible de récupérer le token CSRF');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/supprimer-utilisateur/${utilisateurId}`, {
+                            method: 'DELETE',
+                            credentials: 'include',
+                            headers: {
+                                'x-csrf-token': csrfToken
+                            }
+                        
+                        });
 
                         if (response.ok) {
                             window.location.href = '/voitures/index.html'; // Redirige vers la liste des voitures après la suppression
@@ -315,9 +359,7 @@
                         console.error('Erreur:', error);
                     }
                 });
-            } else {
-                console.error("Le bouton 'delete-utilisateur-btn' est introuvable.");
-            }
+            }  
         });
 
     </script>

@@ -17,7 +17,7 @@
     <!-- Conteneur pour la barre de navigation -->
     <div id="navbar-container"></div>
     <!-- Inclusion de la barre de navigation -->
-    <!--#include virtual="partials/navbar.html" -->
+    <!--#include virtual="partials/navbar.html" --> 
 
     <div class="container">
         <h1 class="text-center p-3 m-2">Ajouter une voiture</h1>
@@ -121,11 +121,24 @@
                     return;
                 }
 
+                // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                let csrfToken = '';
+                try {
+                    const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                    const csrfData = await csrfRes.json();
+                    csrfToken = csrfData.csrfToken;
+                } catch (err) {
+                    console.log('Impossible de récupérer le token CSRF');
+                    return;
+                }
+
                 try {
                     const response = await fetch('/api/ajouter-voiture', {
                         method: 'POST',
+                        credentials: 'include',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                             'x-csrf-token': csrfToken
                         },
                         body: JSON.stringify({
                             modele: voitureModele,
@@ -166,7 +179,7 @@
             async function loadMarquesAndUtilisateurs() {
                 try {
                     const [marquesResponse, utilisateursResponse] = await Promise.all([
-                        fetch('/api/marque'),
+                        fetch('/api/marques'),
                         fetch('/api/utilisateurs')  
                     ]);
 

@@ -47,7 +47,7 @@
             // Fonction pour charger les marques
             async function loadMarques() {
                 try {
-                    const response = await fetch('/api/marque');
+                    const response = await fetch('/api/marques');
                     const marques = await response.json();
                     const tableBody = document.getElementById('marques-table-body');
                     console.log(marques); // log pour afficher les marques dans la console pour le débogage   
@@ -85,9 +85,25 @@
 
             // Fonction pour supprimer une marque 
             async function deleteMarque(marqueId) {
+
+                // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                    let csrfToken = '';
+                    try {
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        console.log('Impossible de récupérer le token CSRF');
+                        return;
+                    }
+
                 try {
                     await fetch(`/api/supprimer-marque/${marqueId}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        credentials: 'include',
+                        headers: {
+                            'x-csrf-token': csrfToken
+                        }
                     });
                 } catch (error) {
                     console.error('Erreur lors de la suppression du rôle:', error);

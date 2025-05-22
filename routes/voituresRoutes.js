@@ -21,7 +21,7 @@ voitureRouter.post(
 );
 
 // Route pour récupérer toutes les voitures
-voitureRouter.get("/voiture", getAllVoitures);
+voitureRouter.get("/voitures", getAllVoitures);
 
 // Route pour récupérer une voiture par ID avec validation de l'ID
 voitureRouter.get("/voiture/:id",

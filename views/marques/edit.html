@@ -11,7 +11,7 @@
     <!-- Conteneur pour l'entête -->
     <header class="bg-primary text-white text-center py-3">
         <h1>Bienvenue dans l'espace d'administration</h1>
-        <p>Utilisez le menu de navigation pour accéder aux différentes sections.</p>
+        <p>Utilisez le menu de navigation pour accéder aux différentes sections.</p> 
     </header>   
 
     <!-- Conteneur pour la barre de navigation -->
@@ -27,8 +27,9 @@
             <input type="text" id="marque-libelle" name="libelle" required>
             <button type="submit" class="btn btn-primary">Enregistrer</button>
             <a href="/marques/index.html" class="btn btn-secondary">Annuler</a>
+            <button id="delete-marque-btn" class="btn btn-danger btn-delete">Supprimer le rôle</button>
         </form>
-        <button id="delete-marque-btn" class="btn btn-danger btn-delete">Supprimer le rôle</button>
+        
     </div>
 
     <script>
@@ -83,11 +84,24 @@
                         errorMessage.textContent = '';
                     }
 
+                     // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                    let csrfToken = '';
+                    try {
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        console.log('Impossible de récupérer le token CSRF');
+                        return;
+                    }
+
                     try {
                         const response = await fetch(`/api/modifier-marque/${marqueId}`, {
                             method: 'PUT',
+                            credentials: 'include',
                             headers: {
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                'x-csrf-token': csrfToken
                             },
                             body: JSON.stringify({ libelle: marqueLibelle })
                         });
@@ -112,9 +126,28 @@
 
             const deleteMarqueBtn = document.getElementById('delete-marque-btn');
             if (deleteMarqueBtn) {
-                deleteMarqueBtn.addEventListener('click', async function() {
+                deleteMarqueBtn.addEventListener('click', async function(event) {
+                    event.preventDefault();
+
+                    // Récupération du token CSRF AVANT d'envoyer la requête DELETE
+                    let csrfToken = '';
                     try {
-                        const response = await fetch(`/api/supprimer-marque/${marqueId}`, { method: 'DELETE' });
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        console.log('Impossible de récupérer le token CSRF');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/supprimer-marque/${marqueId}`, { 
+                            method: 'DELETE',
+                            credentials: 'include',
+                            headers: {
+                                'x-csrf-token': csrfToken
+                            }
+                        });
 
                         if (response.ok) {
                             window.location.href = '/marques/index.html'; // Redirige vers la liste des marques après la suppression

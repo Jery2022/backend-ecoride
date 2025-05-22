@@ -27,8 +27,9 @@
             <input type="text" id="role-libelle" name="libelle" required>
             <button type="submit" class="btn btn-primary">Enregistrer</button>
             <a href="/roles/index.html" class="btn btn-secondary">Annuler</a>
+            <button id="delete-role-btn" class="btn btn-danger btn-delete">Supprimer le rôle</button>
         </form>
-        <button id="delete-role-btn" class="btn btn-danger btn-delete">Supprimer le rôle</button>
+       
     </div>
 
     <script>
@@ -83,11 +84,24 @@
                         errorMessage.textContent = '';
                     }
 
+                    // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                    let csrfToken = '';
+                    try {
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        alert('Impossible de récupérer le token CSRF');
+                        return;
+                    }
+
                     try {
                         const response = await fetch(`/api/modifier-role/${roleId}`, {
                             method: 'PUT',
+                            credentials: 'include',
                             headers: {
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                 'x-csrf-token': csrfToken
                             },
                             body: JSON.stringify({ libelle: roleLibelle })
                         });

@@ -17,7 +17,7 @@
     <!-- Conteneur pour la barre de navigation -->
     <div id="navbar-container"></div>
     <div class="marque-container">
-        <h1 class="text-center p-3 m-2">Gestion des Voitures</h1>
+        <h1 class="text-center p-3 m-2">Gestion des Voitures</h1> 
         <div class="container">
             <table class="table table-responsive caption-top">
                 <caption>Liste des Voitures</caption>
@@ -53,7 +53,7 @@
             // Fonction pour charger les voitures
             async function loadVoitures() {
                 try {
-                    const response = await fetch('/api/voiture');
+                    const response = await fetch('/api/voitures');
                     const voitures = await response.json();
                     const tableBody = document.getElementById('voitures-table-body');
                     
@@ -61,7 +61,7 @@
 
                      // Charger les marques et les utilisateurs
                     const [marques, utilisateurs] = await Promise.all([
-                        fetch('/api/marque').then(res => res.json()),
+                        fetch('/api/marques').then(res => res.json()),
                         fetch('/api/utilisateurs').then(res => res.json())
                     ]);
 
@@ -89,15 +89,30 @@
                         `;
                         tableBody.appendChild(row);
                     });
+
+                     // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                    let csrfToken = '';
+                    try {
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        console.log('Impossible de récupérer le token CSRF');
+                        return;
+                    }
        
                     // Fonction pour supprimer une voiture 
                     async function deleteVoiture(valeur) {
                         try {
                             await fetch(`/api/supprimer-voiture/${valeur}`, {
-                                method: 'DELETE'
+                                method: 'DELETE',
+                                credentials: 'include',
+                                headers: {
+                                    'x-csrf-token': csrfToken
+                                }
                             });
                         } catch (error) {
-                            console.error('Erreur lors de la suppression du rôle:', error);
+                            console.error('Erreur lors de la suppression de la voiture:', error);
                         }
                     }
 

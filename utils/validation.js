@@ -4,9 +4,8 @@ import { INVALID_ID_MESSAGE } from './messages.js';
 // Fonction utilitaire pour valider les IDs
 export const validateId = (id) => {
     const parsedId = parseInt(id, 10);
-
+    
     if (isNaN(parsedId)) {
-        console.log(`ID invalide: ${id}`);
         throw new Error(INVALID_ID_MESSAGE);
     }
     return parsedId;
@@ -27,3 +26,13 @@ export const validateRequest = (req, res, next) => {
     }
     next();
   };
+
+  export function formatTime(time) {
+    const match = time.match(/^(\d{1,2})h(\d{2})$/);
+    if (match) {
+        const hours = match[1].padStart(2, '0');
+        const minutes = match[2];
+        return `${hours}:${minutes}`;
+    }
+    return time; // Retourne la valeur originale si elle est déjà au bon format
+};
