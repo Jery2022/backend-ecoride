@@ -11,4 +11,7 @@ fly.toml
 secrets
 *.code-w*
 hachage.js
+.github
+.vscode
+.dockerignore
 

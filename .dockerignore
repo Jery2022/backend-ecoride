@@ -1,5 +1,4 @@
 # flyctl launch added from .gitignore
-node_modules/
 .env
 .env.local
 .env.test.local
@@ -11,3 +10,18 @@ fly.toml
 secrets/
 ecoride*.sql
 hachage*.js
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+.git
+.gitignore
+*.md
+*.log
+.vscode
+*.sqlite
+*.db
+.github
+scripts/
+tests/
+coverage/
