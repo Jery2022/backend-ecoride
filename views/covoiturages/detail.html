@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails du covoiturage</title>
+    <link rel="stylesheet" href="/css/styles.css" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <!-- Conteneur pour l'entête -->
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Bienvenue dans l'espace d'administration</h1>
+        <p>Utilisez le menu de navigation pour accéder aux différentes sections.</p>
+    </header>   
+
+    <div class="covoiturage-container">
+        <h1 class="text-center p-3 m-2">Détail du covoiturage </h1>
+        <div class="container ">
+            <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+            <div class="col-12 g-3 p-3 bg-info" >
+                <div class="row d-flex justify-content-between mt-3"> 
+                    <div class="col-md-3">
+                        <label for="covoiturage-Id" class="form-label" >N° ID</label>
+                        <input type="text" class="form-control" id="covoiturage-Id" name="id" disabled>
+                    </div>
+                    <div class="col-md-4 ">
+                        <label for="covoiturage-total-credit" class="form-label" >Total crédit (Euros)</label>
+                        <input type="text" class="form-control" id="covoiturage-total-credit" name="total-credit" disabled>
+                    </div>
+                </div>
+                <div class="row mt-3"> 
+                    <div class="col-md-4">
+                        <label for="covoiturage-marque" class="form-label" >Marque de voiture</label>
+                        <input type="text" class="form-control" id="covoiturage-marque" name="marque" disabled>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="covoiturage-depart" class="form-label">Date de départ</label>
+                        <input type="text" class="form-control" id="covoiturage-depart" name="depart" disabled>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="covoiturage-arrivee" class="form-label">Date d'arrivée</label>
+                        <input type="text" class="form-control" id="covoiturage-arrivee" name="arrivee" disabled>
+                    </div>
+                </div>
+                <div class="row mt-3"> 
+                    <div class="col-md-6">
+                        <label for="covoiturage-heure-depart" class="form-label">Heure de départ</label>
+                        <input type="text" class="form-control" id="covoiturage-heure-depart" name="heure-depart" disabled>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="covoiturage-heure-arrivee" class="form-label">Heure d'arrivée</label>
+                        <input type="text" class="form-control" id="covoiturage-heure-arrivee" name="heure-arrivee" disabled>
+                    </div>
+                </div>
+                <div class="row mt-3"> 
+                    <div class="col-md-6">
+                        <label for="covoiturage-lieu-depart" class="form-label">Lieu de départ</label>
+                        <input type="text" class="form-control" id="covoiturage-lieu-depart" name="lieu-depart" disabled>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="covoiturage-lieu-arrivee" class="form-label">Lieu d'arrivée</label>
+                        <input type="text" class="form-control" id="covoiturage-lieu-arrivee" name="lieu-arrivee" disabled>
+                    </div>
+                </div>
+                <div class="row mt-3"> 
+                    <div class="col-md-4">
+                        <label for="covoiturage-total-passagers" class="form-label">Total passagers</label>
+                        <input type="text" class="form-control" id="covoiturage-total-passagers" name="total-passagers" disabled>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="covoiturage-statut" class="form-label">Statut</label>
+                        <input type="text" class="form-control" id="covoiturage-statut" name="statut" disabled>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="covoiturage-creation" class="form-label">Date de création</label>
+                        <input type="text" class="form-control" id="covoiturage-creation" name="creation" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="container mt-5">
+                <table class="table table-responsive caption-top">
+                    <caption>Liste des avis sur ce covoiturage</caption>
+                    <thead class="table-light ">
+                        <tr>
+                            <th>ID</th>
+                            <th>Passagers</th>
+                            <th>Commentaires</th>
+                            <th>notes</th>
+                            <th>Statuts</th>
+                            <th>Envoyé le</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="avis-table-body">
+                        <!-- Les avis seront listés ici -->
+                    </tbody>
+                </table>
+           
+                <div class="alert alert-info" role="alert">
+                    <strong>Note:</strong> Vous pouvez interagir sur un covoiturage en utilisant les boutons correspondants.
+                </div>
+                <a href="/" class="btn btn-secondary">Retour</a>
+            </div>
+        </div>
+        <br><br>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const errorMessageDiv = document.getElementById('error-message');
+            const tableBody = document.getElementById('avis-table-body');
+
+            // Récupération des voitures, des marques, des participations et des covoiturages
+            const [ voitures, marques, participations, covoiturages ] = await Promise.all([
+                fetch('/api/voitures').then(res => res.json()),
+                fetch('/api/marques').then(res => res.json()),
+                fetch('/api/participations').then(res => res.json()),
+                fetch('/api/covoiturages').then(res => res.json()),
+            ]);
+/*
+            if (res.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    } */
+
+            // Récupère l'id du covoiturage depuis l'URL  
+            function getCovoiturageIdFromUrl() {
+                const params = new URLSearchParams(window.location.search);
+                return params.get('id');
+            }
+
+            // Renvoie la marque d'une voiture identifiée par son ID
+            function getMarqueByVoitureId(idVoiture, voitures, marques) {
+                const voiture = voitures.find(v => String(v.id_voiture) === String(idVoiture));
+                if (!voiture) return 'Inconnue';
+                const marque = marques.find(m => String(m.id_marque) === String(voiture.id_marque));
+                return marque ? marque.libelle : 'Inconnue';
+            }
+
+            // Fonction qui retourne le nombre de participants à un covoiturage donné
+            function getNombreParticipants(idVoiture, avis) {
+                return avis.filter(a => String(a.id_covoiturage) === String(idVoiture)).length;
+            }
+
+            // Fonction qui retourne le total de crédits obtenus par le conducteur pour un covoiturage donné
+            function getTotalCreditByCovoiturageId(idCovoiturage, covoiturages, nbreParticipant) {
+                const covoiturage = covoiturages.find(c => String(c.id_covoiturage) === String(idCovoiturage));
+                if (!covoiturage || isNaN(Number(covoiturage.prix))) {
+                    console.warn('Covoiturage non trouvé ou prix invalide');
+                    return 0;
+                }
+                return Number(covoiturage.prix) * Number(nbreParticipant);
+            }
+
+            // Affiche les détails du covoiturage dans le formulaire
+            function afficherDetailsCovoiturage(covoiturage) {
+
+                if (!covoiturage) return;
+
+                const marqueLibelle = getMarqueByVoitureId(covoiturage.id_voiture, voitures, marques);
+                const nombreParticipants = getNombreParticipants(covoiturage.id_covoiturage, participations);
+                const totalCredit = getTotalCreditByCovoiturageId(covoiturage.id_covoiturage, covoiturages, nombreParticipants);
+
+                document.getElementById('covoiturage-Id').value = covoiturage.id_covoiturage || '';
+                document.getElementById('covoiturage-total-credit').value = totalCredit || '';
+                document.getElementById('covoiturage-marque').value = marqueLibelle || '';
+                document.getElementById('covoiturage-depart').value = covoiturage.date_depart ? convertToFrenchDate(covoiturage.date_depart) : '';
+                document.getElementById('covoiturage-arrivee').value = covoiturage.date_arrivee ? convertToFrenchDate(covoiturage.date_arrivee) : '';
+                document.getElementById('covoiturage-heure-depart').value = covoiturage.heure_depart || '';
+                document.getElementById('covoiturage-heure-arrivee').value = covoiturage.heure_arrivee || '';
+                document.getElementById('covoiturage-lieu-depart').value = covoiturage.lieu_depart || '';
+                document.getElementById('covoiturage-lieu-arrivee').value = covoiturage.lieu_arrivee || ''; 
+                document.getElementById('covoiturage-total-passagers').value = nombreParticipants || '';
+                document.getElementById('covoiturage-statut').value = covoiturage.statut_covoiturage || '';
+                document.getElementById('covoiturage-creation').value = covoiturage.date_creation ? convertToFrenchDate(covoiturage.date_creation) : '';
+            }
+
+            // Charge et affiche les avis filtrés pour ce covoiturage
+            async function loadAvisEtDetails() {
+                try {
+                    const covoiturageId = getCovoiturageIdFromUrl();
+                    if (!covoiturageId) {
+                        errorMessageDiv.textContent = "Aucun covoiturage sélectionné.";
+                        errorMessageDiv.classList.remove('d-none');
+                        return;
+                    }
+
+                    // Charger toutes les données nécessaires
+                    const [avis, utilisateurs, covoiturages] = await Promise.all([
+                        fetch('/api/avis').then(res => res.json()),
+                        fetch('/api/utilisateurs').then(res => res.json()),
+                        fetch('/api/covoiturages').then(res => res.json()),
+                     
+                    ]);
+
+                    // Trouver le covoiturage à afficher
+                    const covoiturage = covoiturages.find(c => String(c.id_covoiturage) === String(covoiturageId));
+                   
+                    afficherDetailsCovoiturage(covoiturage);
+
+                    // Créer une map utilisateur pour affichage
+                    const utilisateurMap = {};
+                    utilisateurs.forEach(u => {
+                        utilisateurMap[u.id_utilisateur] = `${u.nom} ${u.prenom}`;
+                    });
+
+                    // Filtrer les avis pour ce covoiturage
+                    const avisFiltres = avis.filter(a => String(a.id_covoiturage) === String(covoiturageId));
+
+                    // Affichage des avis
+                    tableBody.innerHTML = '';
+                    if (avisFiltres.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Aucun avis pour ce covoiturage.</td></tr>';
+                    } else {
+                        avisFiltres.forEach(m => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${m.id_avis}</td>
+                                <td>${utilisateurMap[m.id_utilisateur] || 'Inconnu'}</td>
+                                <td>${m.commentaire || ''}</td>
+                                <td>${m.note || ''}</td>
+                                <td>${m.isValid === 1 ? 'Oui' : 'Non'}</td>
+                                <td>${m.date_creation ? new Date(m.date_creation).toLocaleDateString('fr-FR') : ''}</td>
+                                <td>
+                                <a href="/avis/edit.html?id=${m.id_covoiturage}" class="btn btn-warning">Voir</a>
+                            </td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                    }
+
+                    errorMessageDiv.classList.add('d-none');
+                    errorMessageDiv.textContent = '';
+
+                } catch (error) {
+                    errorMessageDiv.textContent = "Erreur lors du chargement des données.";
+                    errorMessageDiv.classList.remove('d-none');
+                    console.error('Erreur lors du chargement des données:', error);
+                }
+            }
+
+            // Lancer le chargement au démarrage
+            loadAvisEtDetails();
+        });
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/js/functions.js" ></script>
+</body>
+</html>

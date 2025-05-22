@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier une marque</title>
+    <link rel="stylesheet" href="/css/styles.css" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <!-- Conteneur pour l'entête -->
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Bienvenue dans l'espace d'administration</h1>
+        <p>Utilisez le menu de navigation pour accéder aux différentes sections.</p> 
+    </header>   
+
+    <!-- Conteneur pour la barre de navigation -->
+    <div id="navbar-container"></div>
+    <!--#include virtual="partials/navbar.html" -->
+
+    <div class="container">
+        <h1 class="text-center p-3 m-2">Modifier une marque</h1>
+         <!-- Ajoutez une div pour afficher les messages d'erreur -->
+         <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+        <form id="edit-marque-form">
+            <label for="marque-libelle">Nom de la marque:</label>
+            <input type="text" id="marque-libelle" name="libelle" required>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <a href="/marques/index.html" class="btn btn-secondary">Annuler</a>
+            <button id="delete-marque-btn" class="btn btn-danger btn-delete">Supprimer le rôle</button>
+        </form>
+        
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const marqueId = urlParams.get('id');
+
+            if (!marqueId) {
+                console.error('Aucun ID de marque fourni dans l\'URL.');
+                return;
+            }
+
+            // Fonction pour charger les détails de la marque 
+            async function loadMarqueDetails() {
+                try {
+                    const response = await fetch(`/api/marque/${marqueId}`);
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
+                    
+                    if (!response.ok) throw new Error('Impossible de récupérer la marque avec l\'ID ' + marqueId);
+                    
+                    const marque = await response.json();
+                    const marqueLibelleInput = document.getElementById('marque-libelle');
+                    if (marqueLibelleInput) {
+                        marqueLibelleInput.value = marque.libelle;
+                    } else {
+                        console.error("L'élément 'marque-libelle' est introuvable.");
+                    }
+                } catch (error) {
+                    console.error('Erreur lors du chargement des détails de la marque:', error);
+                }
+            }
+
+            // Charger les détails de la marque lorsque le DOM est prêt
+            loadMarqueDetails();
+
+            const form = document.getElementById('edit-marque-form');
+            if (form) {
+                form.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+
+                    const marqueLibelleInput = document.getElementById('marque-libelle');
+                    if (!marqueLibelleInput) {
+                        console.error("L'élément 'marque-libelle' est introuvable.");
+                        return;
+                    }
+
+                    const marqueLibelle = marqueLibelleInput.value;
+                    alert(marqueLibelle); // Log pour afficher le libellé de la marque dans la console pour le débogage
+
+                    // Réinitialiser le message d'erreur
+                    const errorMessage = document.getElementById('error-message');
+                    if (errorMessage) {
+                        errorMessage.classList.add('d-none');
+                        errorMessage.textContent = '';
+                    }
+
+                     // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                    let csrfToken = '';
+                    try {
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        console.log('Impossible de récupérer le token CSRF');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/modifier-marque/${marqueId}`, {
+                            method: 'PUT',
+                            credentials: 'include',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-csrf-token': csrfToken
+                            },
+                            body: JSON.stringify({ libelle: marqueLibelle })
+                        });
+
+                        if (response.ok) {
+                            window.location.href = '/marques/index.html'; // Redirige vers la liste des marques après la modification
+                        } else {
+                            const errorData = await response.json();
+                            if (errorMessage) {
+                                errorMessage.textContent = 'Erreur lors de la modification de la marque : ' + (errorData.errors?.[0]?.msg || "Erreur inconnue");
+                                errorMessage.classList.remove('d-none');
+                            }
+                            console.error('Erreur lors de la modification de la marque:', errorData);
+                        }
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                    }
+                });
+            } else {
+                console.error("Le formulaire 'edit-marque-form' est introuvable.");
+            }
+
+            const deleteMarqueBtn = document.getElementById('delete-marque-btn');
+            if (deleteMarqueBtn) {
+                deleteMarqueBtn.addEventListener('click', async function(event) {
+                    event.preventDefault();
+
+                    // Récupération du token CSRF AVANT d'envoyer la requête DELETE
+                    let csrfToken = '';
+                    try {
+                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                        const csrfData = await csrfRes.json();
+                        csrfToken = csrfData.csrfToken;
+                    } catch (err) {
+                        console.log('Impossible de récupérer le token CSRF');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/supprimer-marque/${marqueId}`, { 
+                            method: 'DELETE',
+                            credentials: 'include',
+                            headers: {
+                                'x-csrf-token': csrfToken
+                            }
+                        });
+
+                        if (response.ok) {
+                            window.location.href = '/marques/index.html'; // Redirige vers la liste des marques après la suppression
+                        } else {
+                            const errorData = await response.json();
+                            console.error('Erreur lors de la suppression de la marque:', errorData.message);
+                            alert('Erreur lors de la suppression de la marque : ' + errorData.message);
+                        }
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                    }
+                });
+            } else {
+                console.error("Le bouton 'delete-marque-btn' est introuvable.");
+            }
+        });
+
+    </script>
+</body>
+</html>

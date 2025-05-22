@@ -52,7 +52,7 @@ form {
   }
 }
 
-// Exemple de style pour la navigation
+// tyle pour la navigation
 .navbar {
   background-color: $primary-color;
   padding: 10px;
@@ -67,3 +67,11 @@ form {
     }
   }
 }
+
+#login-form {
+  background-color: $card-background; 
+  width: 350px;
+  padding: 10px; 
+
+}
+ 

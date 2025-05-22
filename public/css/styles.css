@@ -133,3 +133,9 @@ form button:hover {
 .navbar a:hover {
   text-decoration: underline;
 }
+
+#login-form {
+  background-color: #ffffff;
+  width: 350px;
+  padding: 10px;
+}

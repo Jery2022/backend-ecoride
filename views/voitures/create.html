@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter une voiture</title>
+    <link rel="stylesheet" href="/css/styles.css" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <!-- Conteneur pour l'entête -->
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Bienvenue dans l'espace d'administration</h1>
+        <p>Utilisez le menu de navigation pour accéder aux différentes sections.</p>
+    </header>
+
+    <!-- Conteneur pour la barre de navigation -->
+    <div id="navbar-container"></div>
+    <!-- Inclusion de la barre de navigation -->
+    <!--#include virtual="partials/navbar.html" --> 
+
+    <div class="container">
+        <h1 class="text-center p-3 m-2">Ajouter une voiture</h1>
+        <!-- Ajoutez une div pour afficher les messages d'erreur -->
+        <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+        <form id="create-voiture-form">
+            <div class="mb-3">
+                <label for="voiture-modele" class="form-label">Modèle:</label>
+                <input type="text" class="form-control" id="voiture-modele" name="modele" required>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-immatriculation" class="form-label">Immatriculation:</label>
+                <input type="text" class="form-control" id="voiture-immatriculation" name="immatriculation" required>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-energie" class="form-label">Energie:</label>
+                <input type="text" class="form-control" id="voiture-energie" name="energie" required>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-couleur" class="form-label">Couleur:</label>
+                <input type="text" class="form-control" id="voiture-couleur" name="couleur" required>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-date" class="form-label">Date 1ère circulation:</label>
+                <input type="date" class="form-control" id="voiture-date" name="date" required>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-marque" class="form-label">Marque:</label>
+                <select class="form-select" id="voiture-marque" name="marque" required>
+                    <!-- Les marques seront chargées ici dynamiquement -->
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="voiture-proprietaire" class="form-label">Propriétaire:</label>
+                <select class="form-select" id="voiture-proprietaire" name="proprietaire" required>
+                    <!-- Les propriétaires seront chargés ici dynamiquement -->
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+            <a href="/voitures/index.html" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('create-voiture-form');
+            const errorMessageDiv = document.getElementById('error-message');
+
+            // Chargement dynamique des marques et des utilisateurs
+            loadMarquesAndUtilisateurs();
+
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                const voitureModele = document.getElementById('voiture-modele').value;
+                const voitureImmatriculation = document.getElementById('voiture-immatriculation').value;
+                const voitureEnergie = document.getElementById('voiture-energie').value;
+                const voitureCouleur = document.getElementById('voiture-couleur').value;
+                const voitureDate = document.getElementById('voiture-date').value;
+                const voitureMarque = document.getElementById('voiture-marque').value;
+                const voitureProprietaire = document.getElementById('voiture-proprietaire').value;
+
+                // Réinitialiser le message d'erreur
+                errorMessageDiv.classList.add('d-none');
+                errorMessageDiv.textContent = '';
+
+                // Vérification si les champs de saisie sont vides
+                if (!voitureModele || voitureModele.trim() === '' ) {
+                    errorMessageDiv.textContent = 'Veuillez entrer le modèle de la voiture.';
+                    errorMessageDiv.classList.remove('d-none');
+                    return;
+                }
+                if (!voitureImmatriculation || voitureImmatriculation.trim() === '') {
+                    errorMessageDiv.textContent = 'Veuillez entrer l\'immatriculation de la voiture.';
+                    errorMessageDiv.classList.remove('d-none');
+                    return;
+                }
+                if (!voitureEnergie || voitureEnergie.trim() === '') {
+                    errorMessageDiv.textContent = 'Veuillez entrer l\'énergie de la voiture.';
+                    errorMessageDiv.classList.remove('d-none');
+                    return;
+                }
+                if (!voitureCouleur || voitureCouleur.trim() === '') {
+                    errorMessageDiv.textContent = 'Veuillez entrer la couleur de la voiture.';
+                    errorMessageDiv.classList.remove('d-none');
+                    return;
+                }
+                if (!voitureDate || voitureDate.trim() === '') {
+                    errorMessageDiv.textContent = 'Veuillez entrer la date de première circulation de la voiture.';
+                    errorMessageDiv.classList.remove('d-none');
+                    return;
+                }
+                if (!voitureMarque || voitureMarque.trim() === '') {
+                    errorMessageDiv.textContent = 'Veuillez sélectionner la marque de la voiture.';
+                    errorMessageDiv.classList.remove('d-none');
+                    return;
+                }
+                if (!voitureProprietaire || voitureProprietaire.trim() === '') {
+                    errorMessageDiv.textContent = 'Veuillez sélectionner le propriétaire de la voiture.';
+                    errorMessageDiv.classList.remove('d-none');
+                    return;
+                }
+
+                // Récupération du token CSRF AVANT d'envoyer la requête PUT
+                let csrfToken = '';
+                try {
+                    const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+                    const csrfData = await csrfRes.json();
+                    csrfToken = csrfData.csrfToken;
+                } catch (err) {
+                    console.log('Impossible de récupérer le token CSRF');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/ajouter-voiture', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                             'x-csrf-token': csrfToken
+                        },
+                        body: JSON.stringify({
+                            modele: voitureModele,
+                            immatriculation: voitureImmatriculation,
+                            energie: voitureEnergie,
+                            couleur: voitureCouleur,
+                            date_premiere_circulation: voitureDate,
+                            id_marque: voitureMarque,
+                            id_utilisateur: voitureProprietaire })
+                    });
+
+                    if (response.status === 401) {
+                        alert("Vous devez être connecté pour accéder à cette page.");
+                        window.location.href = '/login/login.html';
+                        return;
+                    }
+
+                    if (response.ok) {
+                        window.location.href = '/voitures/index.html'; // Redirige vers la liste des voitures après la création
+                    } else if (response.status === 400) {
+                        const errorData = await response.json();
+                        const erroMessage = errorData.errors[0].msg; // Récupère le message d'erreur
+
+                        console.log('Erreur lors de la création de la voiture:', errorData.errors[0].msg); // log l'erreur dans la console
+
+                        errorMessageDiv.textContent = 'Erreur lors de la création de la voiture: ' + erroMessage; // Affiche un message d'erreur si la marque existe déjà
+                        errorMessageDiv.classList.remove('d-none');
+
+                    } else if (response.status === 500) {
+                        const errorData = await response.json();
+                        console.log('Erreur interne du serveur :', errorData); // log l'erreur dans la console
+                        errorMessageDiv.textContent = 'Erreur interne du serveur. Veuillez réessayer plus tard.';
+                        errorMessageDiv.classList.remove('d-none');
+
+                    }
+                } catch (err) {
+                    console.error('Erreur:', err);
+                    errorMessageDiv.textContent = 'Une erreur inattendue s\'est produite. Veuillez réessayer.';
+                    errorMessageDiv.classList.remove('d-none');
+                }
+            });
+
+            // Fonction pour charger les marques et les utilisateurs
+            async function loadMarquesAndUtilisateurs() {
+                try {
+                    const [marquesResponse, utilisateursResponse] = await Promise.all([
+                        fetch('/api/marques'),
+                        fetch('/api/utilisateurs')  
+                    ]);
+
+                    if (!marquesResponse.ok) {  
+                        throw new Error('Erreur lors du chargement des marques');
+                    }
+
+                    if (!utilisateursResponse.ok) {
+                        throw new Error('Erreur lors du chargement des utilisateurs');
+                    }
+
+                    const marques = await marquesResponse.json();
+                    const utilisateurs = await utilisateursResponse.json();
+
+                    console.log('Marques:', marques); // log les marques dans la console
+                    console.log('Utilisateurs:', utilisateurs); // log les utilisateurs dans la console
+
+                    const marqueSelect = document.getElementById('voiture-marque');
+                    const proprietaireSelect = document.getElementById('voiture-proprietaire');
+
+                    // Remplir le sélecteur des marques
+                    marques.forEach(marque => {
+                        const option = document.createElement('option');
+                        option.value = marque.id_marque;
+                        option.textContent = marque.libelle;
+                        marqueSelect.appendChild(option);
+                    });
+
+                    utilisateurs.forEach(utilisateur => {
+                        const option = document.createElement('option');
+                        option.value = utilisateur.id_utilisateur;
+                        option.textContent = utilisateur.nom + ' ' + utilisateur.prenom;
+                        proprietaireSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Erreur lors du chargement des marques et des utilisateurs:', error);
+                }
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

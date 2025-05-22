@@ -9,3 +9,6 @@ localhost.session.sql
 fly.toml
 *.sql
 secrets
+*.code-w*
+hachage.js
+

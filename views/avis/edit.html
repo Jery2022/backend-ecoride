@@ -29,7 +29,6 @@
             <a href="/roles/index.html" class="btn btn-secondary">Annuler</a>
             <button id="delete-role-btn" class="btn btn-danger btn-delete">Supprimer le rôle</button>
         </form>
-       
     </div>
 
     <script>
@@ -51,7 +50,7 @@
                         window.location.href = '/login/login.html';
                         return;
                     }
-                    
+
                     if (!response.ok) throw new Error('Impossible de récupérer le rôle');
                     
                     const role = await response.json();
@@ -90,24 +89,11 @@
                         errorMessage.textContent = '';
                     }
 
-                    // Récupération du token CSRF AVANT d'envoyer la requête PUT
-                    let csrfToken = '';
-                    try {
-                        const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
-                        const csrfData = await csrfRes.json();
-                        csrfToken = csrfData.csrfToken;
-                    } catch (err) {
-                        alert('Impossible de récupérer le token CSRF');
-                        return;
-                    }
-
                     try {
                         const response = await fetch(`/api/modifier-role/${roleId}`, {
                             method: 'PUT',
-                            credentials: 'include',
                             headers: {
-                                'Content-Type': 'application/json',
-                                 'x-csrf-token': csrfToken
+                                'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({ libelle: roleLibelle })
                         });

@@ -3,7 +3,7 @@ import connection from '../db/db.js';
 
 import { promisify } from 'util';
 import { validateId, handleValidationErrors } from '../utils/validation.js';
-import { USER_ADDED_MESSAGE, 
+import { 
         USER_NOT_FOUND_MESSAGE, 
         USER_UPDATED_MESSAGE,  
         USER_DELETED_MESSAGE, 
@@ -13,13 +13,12 @@ import { USER_ADDED_MESSAGE,
 // Convertir les méthodes de connexion en Promises 
 const query = promisify(connection.query).bind(connection);
 
-// Création d'un nouvel utilisateur
 export const addUser = async (req, res) => {
-    const { nom, prenom, email,  password } = req.body;
+    const { nom, prenom, email, telephone, adresse, date_naissance, photo, password, pseudo, id_role } = req.body;
 
     // Vérifier les erreurs de validation
-    handleValidationErrors(req, res);
-    
+    const errors = handleValidationErrors(req, res);
+
     try {
         // Vérifier si l'utilisateur existe déjà
         const checkUserSql = 'SELECT * FROM utilisateur WHERE email = ?';
@@ -27,16 +26,84 @@ export const addUser = async (req, res) => {
         if (existingUser.length > 0) {
             return res.status(400).json({ message: 'Cet utilisateur existe déjà.' });
         }
-        // Hachage du mot de passe
-        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const fields = [];
+        const values = [];
+        const searchValues = [];
+
+        if (nom) {
+            fields.push('nom');
+            searchValues.push('?');
+            values.push(nom);
+        }
+        if (prenom) {
+            fields.push('prenom');
+            searchValues.push('?');
+            values.push(prenom);
+        }
+        if (email) {
+            fields.push('email');
+            searchValues.push('?');
+            values.push(email);
+        }
+        if (telephone) {
+            fields.push('telephone');
+            searchValues.push('?');
+            values.push(telephone);
+        }
+        if (adresse) {
+            fields.push('adresse');
+            searchValues.push('?');
+            values.push(adresse);
+        }
+        if (date_naissance) {
+            fields.push('date_naissance');
+            searchValues.push('?');
+            values.push(date_naissance);
+        }
+        if (photo) {
+            fields.push('photo');
+            searchValues.push('?');
+            values.push(photo);
+        }
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10); // Hachage du mot de passe
+            fields.push('password');
+            searchValues.push('?');
+            values.push(hashedPassword);
+        }
+        if (pseudo) {
+            fields.push('pseudo');
+            searchValues.push('?');
+            values.push(pseudo);
+        }
+        if (id_role) {
+            // Vérifier si le rôle existe
+            const roleExists = await query('SELECT 1 FROM role WHERE id_role = ?', [id_role]);
+            if (roleExists.length === 0) {
+                return res.status(400).json({ message: 'Le rôle spécifié n\'existe pas.' });
+            }
+            fields.push('id_role');
+            searchValues.push('?');
+            values.push(id_role);
+        } else {
+            // Utiliser la valeur par défaut si aucun rôle n'est fourni
+            fields.push('id_role');
+            searchValues.push('?');
+            values.push(6); // Valeur par défaut
+        }
+
+        if (fields.length === 0) {
+            return res.status(400).json({ message: 'Aucune donnée à insérer.' });
+        }
 
         // Insertion de l'utilisateur dans la base de données
-        const sql = 'INSERT INTO utilisateur (nom, prenom, email,  password) VALUES (?, ?, ?, ?)';
-        const result = await query(sql, [nom, prenom, email, hashedPassword]);
-        res.status(201).json({ message: USER_ADDED_MESSAGE, id: result.insertId });
+        const sql = `INSERT INTO utilisateur (${fields.join(', ')}) VALUES (${searchValues.join(', ')})`;
+        const result = await query(sql, values);
+        res.status(201).json({ message: 'Utilisateur ajouté avec succès.', id: result.insertId });
     } catch (err) {
         console.error('Erreur lors de l\'ajout de l\'utilisateur :', err.message);
-        res.status(500).json({ message: SERVER_ERROR_MESSAGE });
+        res.status(500).json({ message: 'Erreur interne du serveur.' });
     }
 };
 
@@ -72,7 +139,7 @@ export const getUser = async (req, res) => {
 // Mettre à jour un utilisateur par son ID
 export const updateUser = async (req, res) => {
     const id = validateId(req.params.id);
-    const { nom, prenom, email, telephone, adresse, date_naissance, photo, password, pseudo, role } = req.body;
+    const { nom, prenom, email, telephone, adresse, date_naissance, photo, password, pseudo, id_role, isValid } = req.body;
 
     handleValidationErrors(req, res);    // Vérifier les erreurs de validation
 
@@ -122,9 +189,14 @@ export const updateUser = async (req, res) => {
         values.push(pseudo);
     }
 
-    if (role) {
+    if (id_role) {
         fields.push('id_role = ?');
-        values.push(role);
+        values.push(id_role);
+    }
+
+    if (isValid) {
+        fields.push('isValid = ?');
+        values.push(isValid);
     }
 
     if (fields.length === 0) {
