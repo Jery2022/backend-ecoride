@@ -61,7 +61,9 @@ Aller dans votre navigateur ou utiliser un outil comme Postman pour accéder à 
 
 # COMMENT RECUPERER MES CONTENEURS SUR DOCKER HUB
 
+Aller sur votre navigateur préféré et taper la ligne :
 
+https://hub.docker.com/repositories/jery241
 
 
 # COMMENT ACCEDER A MON BACKEND EN LIGNE
