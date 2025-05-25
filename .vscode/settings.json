@@ -27,6 +27,20 @@
             "database": "ecoride_db",
             "username": "studi_ecoride",
             "askForPassword": true
+        },
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "127.0.0.1",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "ecoride-fly-io",
+            "database": "ecoride_db",
+            "username": "studi_ecoride",
+            "password": "123Kevazingo"
         }
     ]
 }

@@ -1,27 +1,19 @@
-# fly.toml app configuration file generated for backend-ecoride-restless-darkness-5290 on 2025-05-10T19:52:26+01:00
+# fly.toml app configuration file generated for backend-ecoride-divine-bird-7975 on 2025-05-23T11:59:47+01:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'backend-ecoride-restless-darkness-5290'
+app = 'backend-ecoride-divine-bird-7975'
 primary_region = 'cdg'
 
 [build]
-  dockerfile = 'Dockerfile'
 
 [env]
-  DATABASE_HOST = 'mysql'
-  DATABASE_NAME = 'ecoride_db'
-  DATABASE_PASSWORD = '123Kevazingo'
-  DATABASE_PORT = '8787'
-  MYSQL_DATABASE = 'ecoride_db'
-  MYSQL_PASSWORD = '123Kevazingo'
-  MYSQL_ROOT_PASSWORD = '123Kevazingo'
-  MYSQL_USER = 'root'
-
-[[mounts]]
-  source = 'mysqldata'
-  destination = '/data'
+  DATABASE_HOST = "ecoride-mysql-internal.internal"
+  DATABASE_USER = "studi_ecoride"
+  DATABASE_PASSWORD = "123Kevazingo"
+  DATABASE_NAME = "ecoride_db"
+  DATABASE_PORT = "3306"
 
 [http_service]
   internal_port = 3000
@@ -29,16 +21,9 @@ primary_region = 'cdg'
   auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
-
-[[services]]
-  protocol = 'tcp'
-  internal_port = 3000
-
-  [[services.ports]]
-    port = 80
-    handlers = ['http']
+  processes = ['app']
 
 [[vm]]
   memory = '1gb'
-  cpu_kind = 'shared'
+  cpu_kind = 'shared' 
   cpus = 1

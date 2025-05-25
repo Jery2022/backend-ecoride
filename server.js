@@ -24,19 +24,15 @@ import dotenv from 'dotenv';
 
 dotenv.config(); // Charger les variables d'environnement   
 
-
-
 const csrfProtection = csrf(); // session uniquement
 //const expiryDate = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
 
-
 const app = express();
-const port = process.env.PORT || 4500; // Port par défaut pour le serveur
+const port = process.env.PORT || 3000; // Port par défaut pour le serveur
 
 // Obtenir le répertoire courant
-const __filename = fileURLToPath(import.meta.url);    
+const __filename = fileURLToPath(import.meta.url);      
 const __dirname = path.dirname(__filename);
-
 
 // Middlewares  
 app.use(bodyParser.json()); // Pour parser les données JSON

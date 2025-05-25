@@ -7,15 +7,13 @@ ENV  MYSQL_DATABASE=ecoride_db
 # Use runtime environment variables or Docker secrets for sensitive data
 # MYSQL_PASSWORD and MYSQL_ROOT_PASSWORD should be provided at runtime
 
-
 # Exposer le port MySQL
 EXPOSE 3306
 
 # Étape 2 : Image Node.js
-# FROM node:22.15.0-alpine3.21 AS node 
 
 # Image de base Node.js
-FROM node:22.15.0-alpine3.21 AS node
+FROM node:22.15.0-alpine3.21 AS node 
 
 # Mettre à jour le système et installer les dépendances nécessaires
 #RUN apk update && apk add --no-cache bash
@@ -32,13 +30,12 @@ COPY package*.json  ./
 # Changer l'utilisateur pour éviter d'exécuter l'application en tant que root
 # USER node
 
-
 # Installer les dépendances en mode production
 # RUN npm ci --production
-# RUN npm install --production
-RUN npm install 
+RUN npm install --production
+# RUN npm install 
 
-# Copier le reste des fichiers de l'application
+# Copier le reste des fichiers de l'application 
 COPY . .
 
 # Exposer le port de l'application Node.js

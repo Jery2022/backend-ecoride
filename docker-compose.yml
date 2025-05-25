@@ -11,12 +11,10 @@ services:
       # Anonymous volume:
       - /app/node_modules
     ports:
-      - "3000:3000"
+      - "8080:3000"
     environment:
-      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
-      MYSQL_DATABASE: ${DATABASE_NAME}
-      MYSQL_USER: ${DATABASE_USER}
-      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      - PORT=3000
+      - DATABASE_HOST=mysql
     command: ["node", "server.js"]
     depends_on:
       mysql:
@@ -25,13 +23,14 @@ services:
       - app-network
 
   mysql:
-    image: mysql:${MYSQL_VERSION:-8.0.27}
+    image: mysql:${MYSQL_VERSION:-8.0.27} 
     volumes:
       - mysql_data:/var/lib/mysql
       - ./scripts:/docker-entrypoint-initdb.d
     ports:
       - "8787:3306"
     environment:
+      DATABASE_HOST: mysql
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
       MYSQL_DATABASE: ${DATABASE_NAME}
       MYSQL_USER: ${DATABASE_USER}
@@ -44,9 +43,9 @@ services:
     networks:
       - app-network
 
-secrets:
-  mysql_root_password:
-    file: ./secrets/mysql_root_password.txt
+#secrets:
+#  mysql_root_password:
+#    file: ./secrets/mysql_root_password.txt
 
 volumes:
   mysql_data:

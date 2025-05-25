@@ -55,11 +55,20 @@ Vous devez installer le module mysql2, qui vous permet d'interagir avec une base
 Créez un fichier (par exemple, db.js) pour gérer la connexion à la base de données.
 
 9. Tester votre API
-Lancez votre application en utilisant la commande suivante : node server.js
+Lancer votre application en utilisant la commande suivante : node server.js
 
-Allez dans votre navigateur ou utilisez un outil comme Postman pour accéder à http://localhost:3000/utilisateurs. Vous devriez voir les données de votre table MySQL au format JSON.
+Aller dans votre navigateur ou utiliser un outil comme Postman pour accéder à http://localhost:7000/utilisateurs. Vous devriez voir les données de votre table MySQL au format JSON.
+
+# COMMENT RECUPERER MES CONTENEURS SUR DOCKER HUB
 
 
 
 
+# COMMENT ACCEDER A MON BACKEND EN LIGNE
 
+Aller sur votre navigateur préféré et taper la ligne :
+
+https://backend-ecoride-divine-bird-7975.fly.dev/
+
+
+Merci.
