@@ -54,7 +54,7 @@ app.use(session({
   saveUninitialized: true
 })); 
 
-app.use(csrf()); 
+//app.use(csrf()); 
 
 
 // Fonction pour déterminer le type MIME en fonction de l'extension
@@ -223,12 +223,12 @@ app.use('/api', isAuthenticated, participationRouter);
 
 
 
-/*
+
 // Middleware pour gérer les erreurs 404
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'views', 'partials', '404.html')); // Affichage de la page 404
 });
-*/
+
 
 app.listen(port, () => {
     console.log(`Serveur en écoute sur http://localhost:${port}`); 
